@@ -1,34 +1,33 @@
 """
 Django settings for AulakitPro project.
+Versión Final Corregida para Render.
 """
 
 import os
 from pathlib import Path
-import environ # Necesario para leer el .env
+import environ
+import dj_database_url # <--- 🚨 CORRECCIÓN 1: Importación necesaria para el bloque de base de datos.
 
 # Inicializar django-environ
 env = environ.Env()
 
-# Construir la ruta al directorio raíz de tu proyecto (donde está el .env)
-# BASE_DIR es la carpeta AulaKitPro_Core, por eso necesitamos 2x parent.
+# Construir la ruta al directorio raíz
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# CORRECCIÓN PARA RENDER:
-# Solo intentamos leer el archivo .env si realmente existe.
-# Si no existe (como en Render), usamos las variables de entorno del panel.
+# CORRECCIÓN PARA RENDER: Solo lee el .env si existe (para local)
 env_file = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Lee la clave secreta del .env
+# --- SEGURIDAD ---
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# En producción, DEBUG debe ser False.
 DEBUG = env.bool('DEBUG', default=False)
 
 
-ALLOWED_HOSTS = ['143.198.138.195', 'localhost', '127.0.0.1']
+# 🚨 CORRECCIÓN 2: Permite que Render acceda.
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,9 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Tus apps:
     'usuarios',
-    # 'pagos',
-    'whitenoise.runserver_nostatic', 
+    # 'pagos', # Correctamente comentado
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
@@ -75,13 +75,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-        # Database
-# CORRECCIÓN PARA RENDER:
-# Si existe la variable DATABASE_URL (Producción), la usamos.
-# Si no (durante el Build), usamos una SQLite local para que no falle.
-if os.environ.get('DATABASE_URL'):
+# --- BASE DE DATOS (ESTO YA NO DEBE FALLAR) ---
+# Usa la DB de Render (Postgres) o SQLite temporal para el build.
+if 'DATABASE_URL' in os.environ:
     DATABASES = {
-        'default': env.db('DATABASE_URL')
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600
+        )
     }
 else:
     DATABASES = {
@@ -92,8 +93,13 @@ else:
     }
 
 
-# Password validation
-# ... (Deja esta sección intacta)
+# Password validation (Deja esta sección intacta)
+AUTH_PASSWORD_VALIDATORS = [
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+]
 
 
 # Internationalization
@@ -118,24 +124,15 @@ STORAGES = {
     },
 }
 
-
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # --- STRIPE Y OTROS ---
-# CORRECCIÓN: Usamos 'default' para evitar fallos si las claves no están puestas aún.
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy_clave_temporal')
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy_clave_temporal')
 
 # Configuración de usuario
-# settings.py (cerca del final)
-
 AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'  # <--- CAMBIO AQUÍ
-
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
-
-
-
