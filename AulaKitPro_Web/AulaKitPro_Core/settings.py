@@ -123,9 +123,10 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Configuración de Stripe (usando variables del .env)
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY')
+# --- STRIPE Y OTROS ---
+# CORRECCIÓN: Usamos 'default' para evitar fallos si las claves no están puestas aún.
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy_clave_temporal')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy_clave_temporal')
 
 # Configuración de usuario
 # settings.py (cerca del final)
@@ -135,5 +136,6 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # <--- CAMBIO AQUÍ
 
 LOGOUT_REDIRECT_URL = '/login/'
+
 
 
