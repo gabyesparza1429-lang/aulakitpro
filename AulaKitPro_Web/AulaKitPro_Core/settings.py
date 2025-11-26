@@ -13,8 +13,12 @@ env = environ.Env()
 # BASE_DIR es la carpeta AulaKitPro_Core, por eso necesitamos 2x parent.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Leer el archivo .env en el directorio base del proyecto (AulaKitPro_Web)
-environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
+# CORRECCIÓN PARA RENDER:
+# Solo intentamos leer el archivo .env si realmente existe.
+# Si no existe (como en Render), usamos las variables de entorno del panel.
+env_file = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_file):
+    environ.Env.read_env(env_file)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Lee la clave secreta del .env
@@ -120,4 +124,5 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY')
 AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # <--- CAMBIO AQUÍ
+
 LOGOUT_REDIRECT_URL = '/login/'
