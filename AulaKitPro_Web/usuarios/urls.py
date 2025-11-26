@@ -16,12 +16,17 @@ urlpatterns = [
     # Logout
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     
-   # Registro
-path('registro/', CustomUserCreationView.as_view(), name='registro'),
+# AulaKitPro_Web/usuarios/urls.py (Fragmento)
+
+# ...
+# Registro: AHORA USA LA FUNCIÓN 'views.registro'
+path('registro/', views.registro, name='registro'), 
+# ...
 
     # RUTA DEL DASHBOARD PROTEGIDO (Mantenemos esta ruta específica)
     path('dashboard/', views.dashboard, name='dashboard'), 
 
     # Prueba
     path('prueba/', views.prueba, name='prueba'), 
+
 ]
