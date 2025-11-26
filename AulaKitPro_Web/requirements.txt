@@ -1,30 +1,22 @@
 """
 Django settings for AulaKitPro project.
-Settings configurados para ser robustos en despliegue (Render).
+MODO EMERGENCIA: Configuración directa para que Render arranque.
 """
 
 import os
 from pathlib import Path
-import environ
-import dj_database_url
 
-# Inicializar django-environ
-env = environ.Env()
-
-# Construir la ruta al directorio raíz
+# Construir la ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Leer .env si existe (útil para local, no falla si no existe)
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# --- SEGURIDAD SIMPLIFICADA ---
+# Ponemos la clave directamente para que no falle buscando variables
+SECRET_KEY = 'django-insecure-clave-de-emergencia-para-arrancar-ya'
 
-# --- SEGURIDAD ---
-# Usamos un valor por defecto para que el 'build' de Render no falle
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-temporal-para-build-render')
+# Dejamos DEBUG en True solo para ver si arranca (luego lo cambiamos)
+DEBUG = True
 
-# En producción (Render), DEBUG debe ser False, pero ponemos un default
-DEBUG = env.bool('DEBUG', default=False)
-
-# --- HOSTS PERMITIDOS ---
+# Permitir que Render (y todo el mundo) vea la página
 ALLOWED_HOSTS = ['*']
 
 # --- APLICACIONES ---
@@ -37,13 +29,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Tus apps:
     'usuarios',
-    # 'pagos', # Mantenemos pagos comentado por seguridad hasta que funcione el resto
+    # 'pagos',  <-- Mantenemos pagos desactivado por ahora
     'whitenoise.runserver_nostatic', 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ¡Importante para Render!
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,23 +64,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-# --- BASE DE DATOS (ESTO ES LO QUE ARREGLA EL ERROR) ---
-# Si estamos en Render (hay DATABASE_URL), úsala.
-# Si estamos construyendo (no hay DATABASE_URL), usa una temporal para no explotar.
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
-        )
+# --- BASE DE DATOS SIMPLE (SQLite) ---
+# Usamos la misma base de datos que usas en tu PC. 
+# Render se quejará de que se borra cada vez que reinicias, 
+# pero servirá para ver el Login y el Dashboard HOY.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # --- VALIDACIÓN DE PASSWORD ---
 AUTH_PASSWORD_VALIDATORS = [
@@ -98,7 +83,7 @@ AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
-# --- IDIOMA Y ZONA ---
+# --- IDIOMA ---
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Mexico_City'
 USE_I18N = True
@@ -111,6 +96,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Configuración de WhiteNoise para que se vean los estilos
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -122,11 +108,12 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- STRIPE Y OTROS ---
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy')
-STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy')
+# --- EXTRAS ---
+# Ponemos claves falsas de Stripe para que no de error al arrancar
+STRIPE_SECRET_KEY = 'sk_test_falso'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_falso'
 
-# --- USUARIOS ---
+# Configuración de Login
 AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
