@@ -75,12 +75,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-
-# Database
-# Lee la base de datos de la variable DATABASE_URL del .env
-DATABASES = {
-    'default': env.db('DATABASE_URL')
-}
+        # Database
+# CORRECCIÓN PARA RENDER:
+# Si existe la variable DATABASE_URL (Producción), la usamos.
+# Si no (durante el Build), usamos una SQLite local para que no falle.
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': env.db('DATABASE_URL')
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -126,4 +135,5 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # <--- CAMBIO AQUÍ
 
 LOGOUT_REDIRECT_URL = '/login/'
+
 
