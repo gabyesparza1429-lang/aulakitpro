@@ -22,7 +22,7 @@ if os.path.exists(env_file):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Lee la clave secreta del .env
-SECRET_KEY = env('SECRET_KEY') # <--- CORRECCIÓN APLICADA AQUÍ
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
@@ -126,3 +126,4 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # <--- CAMBIO AQUÍ
 
 LOGOUT_REDIRECT_URL = '/login/'
+
