@@ -6,7 +6,7 @@ Settings configurados para ser robustos en despliegue (Render).
 import os
 from pathlib import Path
 import environ
-import dj_database_url  # Asegura compatibilidad extra
+import dj_database_url
 
 # Inicializar django-environ
 env = environ.Env()
@@ -25,8 +25,6 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-temporal-para-buil
 DEBUG = env.bool('DEBUG', default=False)
 
 # --- HOSTS PERMITIDOS ---
-# IMPORTANTE: El asterisco '*' permite que Render funcione con cualquier dominio
-# También incluimos la extensión de Render por si acaso.
 ALLOWED_HOSTS = ['*']
 
 # --- APLICACIONES ---
@@ -45,7 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise debe ir justo después de Security
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,9 +72,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-# --- BASE DE DATOS ---
-# Usamos un truco: Si hay DATABASE_URL (Render), la usa.
-# Si no (durante el build), usa una base de datos temporal SQLite para no explotar.
+# --- BASE DE DATOS (ESTO ES LO QUE ARREGLA EL ERROR) ---
+# Si estamos en Render (hay DATABASE_URL), úsala.
+# Si estamos construyendo (no hay DATABASE_URL), usa una temporal para no explotar.
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.config(
@@ -113,7 +111,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Configuración correcta para WhiteNoise en versiones nuevas de Django
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -126,7 +123,6 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- STRIPE Y OTROS ---
-# Usamos 'default' para evitar errores si las variables no están puestas aún
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy')
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy')
 
