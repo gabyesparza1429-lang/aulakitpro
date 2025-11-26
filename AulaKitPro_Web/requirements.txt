@@ -1,6 +1,7 @@
 asgiref
 certifi
-charset-normalizeR
+charset-normalizer
+dj-database-url
 Django
 django-environ
 idna
@@ -11,4 +12,5 @@ typing_extensions
 tzdata
 urllib3
 whitenoise
+gunicorn
 psycopg2-binary
