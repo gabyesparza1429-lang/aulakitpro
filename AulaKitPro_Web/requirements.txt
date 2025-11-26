@@ -1,0 +1,15 @@
+asgiref
+certifi
+charset-normalizer
+Django
+django-environ
+idna
+requests
+sqlparse
+stripe
+typing_extensions
+tzdata
+urllib3
+whitenoise
+gunicorn
+psycopg2-binary
