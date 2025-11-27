@@ -4,10 +4,10 @@ from django.contrib.auth import login
 from .forms import CustomUserCreationForm
 
 # ---------------------------------------------------------
-# 1. VISTA DASHBOARD (Esta es la que el error dice que falta)
+# 1. VISTA PANEL (Antes dashboard, renombrada para "despegar" al servidor)
 # ---------------------------------------------------------
-@login_required(login_url='/login/') 
-def dashboard(request):
+@login_required(login_url='/login/')
+def panel(request): # <--- CAMBIO DE NOMBRE AQUÍ
     """
     Vista principal de la aplicación.
     """
@@ -22,7 +22,8 @@ def registro(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('usuarios:dashboard')
+            # Redirigir al nuevo nombre 'panel'
+            return redirect('usuarios:panel') # <--- CAMBIO DE NOMBRE AQUÍ
     else:
         form = CustomUserCreationForm()
     return render(request, 'usuarios/registro.html', {'form': form})
