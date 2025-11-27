@@ -58,12 +58,23 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'AulaKitPro_Core.urls'
 
 TEMPLATES = [
-'DIRS': [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR / 'usuarios' / 'templates',  # <--- AGREGA ESTO
+            BASE_DIR / 'usuarios' / 'templates',
         ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
 ]
-
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
 # --- BASE DE DATOS (ESTO YA NO DEBE FALLAR) ---
@@ -127,4 +138,5 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
 
