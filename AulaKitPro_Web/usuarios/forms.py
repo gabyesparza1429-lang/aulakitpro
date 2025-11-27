@@ -1,15 +1,18 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser
 
-# 1. Formulario para la CREACIÓN de usuarios (CORRECCIÓN CRÍTICA)
+# ---------------------------------------------------------
+# 1. Formulario para la CREACIÓN de usuarios (Registro Público)
+# ---------------------------------------------------------
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        # Lista CORREGIDA: Solo incluimos los campos esenciales (username, email)
-        # más tus campos personalizados, eliminando los que causan el conflicto de inicio.
-        fields = ('username', 'email', 'is_pro', 'limite_generaciones_ia', 'stripe_customer_id') 
+        # ✅ CORRECCIÓN FINAL: Solo incluimos los campos que el usuario debe llenar.
+        # Los campos de licencia (is_pro, stripe_customer_id, limite_generaciones_ia)
+        # se inicializan automáticamente con sus valores por defecto en models.py.
+        fields = ('username', 'email', 'first_name', 'last_name') 
 
-    # Función crucial para cifrar la contraseña
+    # Función crucial para asegurar que la contraseña se guarde cifrada y no como texto plano
     def save(self, commit=True):
         user = super().save(commit=False)
         password = self.cleaned_data.get("password")
@@ -19,11 +22,13 @@ class CustomUserCreationForm(UserCreationForm):
             user.save()
         return user
 
-# 2. Formulario para la MODIFICACIÓN de usuarios (Editar)
+# ---------------------------------------------------------
+# 2. Formulario para la MODIFICACIÓN de usuarios (Panel Admin)
+# ---------------------------------------------------------
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        # Para la modificación, la lista extensa es correcta y aceptable:
+        # Para el panel de administración (solo para ti), listamos todos los campos.
         fields = ('username', 'email', 'first_name', 'last_name', 'is_active', 
                   'is_staff', 'is_superuser', 'groups', 
                   'is_pro', 'limite_generaciones_ia', 'stripe_customer_id')
