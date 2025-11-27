@@ -4,7 +4,7 @@ from django.contrib.auth import login
 from .forms import CustomUserCreationForm
 
 # ---------------------------------------------------------
-# 1. VISTA DASHBOARD (Esta es la que falta y causa el error)
+# 1. VISTA DASHBOARD (Esta es la que el error dice que falta)
 # ---------------------------------------------------------
 @login_required(login_url='/login/') 
 def dashboard(request):
@@ -14,7 +14,7 @@ def dashboard(request):
     return render(request, 'usuarios/dashboard.html')
 
 # ---------------------------------------------------------
-# 2. VISTA REGISTRO (Ya corregida y limpia)
+# 2. VISTA REGISTRO
 # ---------------------------------------------------------
 def registro(request):
     if request.method == 'POST':
