@@ -1,34 +1,34 @@
-from django.shortcuts import render, redirect # Necesitas 'redirect' por si la usas
+from django.shortcuts import render, redirect # Importar redirect para la redirección final
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login # Necesario para iniciar sesión después del registro
+from .forms import CustomUserCreationForm # <--- IMPORTAMOS EL FORMULARIO
+from django.contrib.auth import login # Para iniciar sesión después del registro
+
+# ... (código existente: dashboard, prueba) ...
 
 
-# 1. Vista de Dashboard (protegida y principal)
-@login_required(login_url='/login/')
-def dashboard(request):
-    """
-    Vista principal de la aplicación.
-    """
-    # El objeto 'user' tiene todos tus campos personalizados
-    return render(request, 'usuarios/dashboard.html')
-
-
-# 2. Vista de Registro (Temporalmente solo renderiza la plantilla)
+# 2. Vista de Registro (AHORA CON LÓGICA DE PROCESAMIENTO)
 def registro(request):
     """
-    Vista que maneja la lógica de registro. Por ahora solo muestra la plantilla.
+    Vista que procesa el formulario de registro y guarda al usuario.
     """
-    # Para la fase de prueba: solo renderizamos el HTML que tienes.
-    # En producción, aquí iría la lógica de procesar el formulario.
-    return render(request, 'usuarios/registro.html')
+    if request.method == 'POST':
+        # 1. Recibir los datos enviados por el formulario
+        form = CustomUserCreationForm(request.POST)
 
+        # 2. Validar que los datos sean correctos (ej: contraseñas iguales, campos llenos)
+        if form.is_valid():
+            # 3. Guardar el nuevo usuario en la base de datos
+            user = form.save()
+            
+            # 4. Iniciar sesión automáticamente al usuario creado (Opcional)
+            login(request, user)
+            
+            # 5. Redirigir al dashboard (o a donde desees)
+            return redirect('usuarios:dashboard') # <--- Cambia a la ruta que uses para el inicio
 
-# 3. Vista de Prueba (Para confirmar que la ruta funciona)
-def prueba(request):
-    """
-    Vista de prueba (cargada por la ruta /prueba/).
-    """
-    return render(request, 'usuarios/prueba.html')
+    else:
+        # Si el método es GET (primera vez que se carga la página), muestra el formulario vacío
+        form = CustomUserCreationForm()
 
-# NOTA: La clase CustomUserCreationView y sus imports fueron eliminados
-# para asegurar que el comando 'migrate' se ejecute sin fallos.
+    # Renderiza la plantilla, pasando el formulario a registro.html
+    return render(request, 'usuarios/registro.html', {'form': form})
