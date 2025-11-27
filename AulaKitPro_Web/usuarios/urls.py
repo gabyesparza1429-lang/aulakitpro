@@ -5,15 +5,19 @@ from . import views
 app_name = 'usuarios'
 
 urlpatterns = [
-    # Ruta raíz ahora apunta a 'panel'
-    path('', views.panel, name='home'), 
+    # Ruta Raíz -> Va al Dashboard
+    path('', views.dashboard, name='home'), 
     
+    # Login y Logout
     path('login/', auth_views.LoginView.as_view(template_name='usuarios/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    
+    # Registro
     path('registro/', views.registro, name='registro'), 
 
-    # Ruta Dashboard ahora apunta a la vista 'panel' (pero la url sigue siendo /dashboard/)
-    path('dashboard/', views.panel, name='panel'), # <--- CAMBIO AQUÍ (name='panel' y views.panel)
+    # Ruta Dashboard -> Busca views.dashboard
+    path('dashboard/', views.dashboard, name='dashboard'), 
 
+    # Prueba
     path('prueba/', views.prueba, name='prueba'), 
 ]
