@@ -4,11 +4,13 @@ from django.contrib.auth import login
 from .forms import CustomUserCreationForm
 
 # ---------------------------------------------------------
-# 1. VISTA DASHBOARD
-# (Asegúrate de que la 'd' de def esté pegada a la izquierda)
+# 1. VISTA DASHBOARD (El nombre ESTÁNDAR)
 # ---------------------------------------------------------
 @login_required(login_url='/login/')
-def dashboard(request):
+def dashboard(request): 
+    """
+    Vista principal de la aplicación.
+    """
     return render(request, 'usuarios/dashboard.html')
 
 # ---------------------------------------------------------
@@ -20,7 +22,7 @@ def registro(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('usuarios:dashboard')
+            return redirect('usuarios:dashboard') 
     else:
         form = CustomUserCreationForm()
     return render(request, 'usuarios/registro.html', {'form': form})
