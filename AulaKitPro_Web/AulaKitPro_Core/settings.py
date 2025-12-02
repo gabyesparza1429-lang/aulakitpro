@@ -6,7 +6,7 @@ Versión Final Corregida para Render.
 import os
 from pathlib import Path
 import environ
-import dj_database_url # <--- 🚨 CORRECCIÓN 1: Importación necesaria para el bloque de base de datos.
+import dj_database_url
 
 # Inicializar django-environ
 env = environ.Env()
@@ -20,15 +20,13 @@ if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
 # --- SEGURIDAD ---
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
+SECRET_KEY = env('SECRET_KEY')
 
 # En producción, DEBUG debe ser False.
 DEBUG = env.bool('DEBUG', default=False)
 
-
 # 🚨 CORRECCIÓN 2: Permite que Render acceda.
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 # Application definition
 INSTALLED_APPS = [
@@ -138,7 +136,3 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
-
-
-
-
