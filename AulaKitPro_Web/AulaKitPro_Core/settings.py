@@ -27,7 +27,7 @@ DEBUG = env.bool('DEBUG', default=False)
 
 
 # 🚨 CORRECCIÓN 2: Permite que Render acceda.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 
 # Application definition
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Tus apps:
     'usuarios',
-    # 'pagos', # Correctamente comentado
+    'pagos',
     'whitenoise.runserver_nostatic',
 ]
 
