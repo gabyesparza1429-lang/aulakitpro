@@ -3,6 +3,7 @@ services:
     name: AulaKitPro
     env: python
     branch: feat/prepare-for-launch
+    rootDir: AulaKitPro_Web
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input"
     startCommand: "gunicorn AulaKitPro_Core.wsgi"
     envVars:
