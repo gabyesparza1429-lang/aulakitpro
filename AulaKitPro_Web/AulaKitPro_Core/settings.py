@@ -27,7 +27,11 @@ DEBUG = env.bool('DEBUG', default=False)
 
 
 # 🚨 CORRECCIÓN 2: Permite que Render acceda.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+
+# Confiar en las cabeceras del proxy de Render
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 # Application definition
@@ -40,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Tus apps:
     'usuarios',
-    # 'pagos', # Correctamente comentado
+    'pagos',
     'whitenoise.runserver_nostatic',
 ]
 
@@ -90,7 +94,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "NAME": "/app/sqlite/db.sqlite3",
         }
     }
 
@@ -138,7 +142,3 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
-
-
-
-

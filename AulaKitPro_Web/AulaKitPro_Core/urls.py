@@ -8,13 +8,13 @@ from django.conf.urls.static import static
 urlpatterns = [
     # Ruta de Administración de Django
     path('admin/', admin.site.urls),
-    
+
     # CORRECCIÓN CLAVE: La raíz (path='') apunta al app usuarios
-    # Si estaba así: path('usuarios/', include('usuarios.urls')), el servidor buscaba 
+    # Si estaba así: path('usuarios/', include('usuarios.urls')), el servidor buscaba
     # en 143.198.138.195/usuarios/
-    path('', include('usuarios.urls')), 
-    
-    #path('pagos/', include('pagos.urls')),# 
+    path('', include('usuarios.urls')),
+
+    path('pagos/', include('pagos.urls')),
 ]
 
 # Configuración para servir archivos estáticos/media en entorno de desarrollo
