@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: AulaKitPro
+    env: python
+    branch: feat/prepare-for-launch
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input"
+    startCommand: "gunicorn AulaKitPro_Core.wsgi"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aulakitpro-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
