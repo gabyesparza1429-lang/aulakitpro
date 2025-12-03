@@ -7,9 +7,8 @@ from . import views
 app_name = 'pagos'
 
 urlpatterns = [
-    # ... otras URLs
     path('checkout/', views.create_checkout_session, name='checkout'),
-    # ⬇️ NUEVA URL DEL WEBHOOK (Stripe enviará peticiones a esta ruta)
-    path('webhook/', views.stripe_webhook, name='webhook'), 
-    # ...
+    path('success/', views.payment_success, name='success'),
+    path('cancel/', views.payment_cancel, name='cancel'),
+    path('webhook/', views.stripe_webhook, name='webhook'),
 ]

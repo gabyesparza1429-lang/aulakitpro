@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: AulaKitPro
+    env: python
+    rootDir: AulaKitPro_Web
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --no-input"
+    startCommand: "gunicorn AulaKitPro_Core.wsgi"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: AulaKitPro
+          property: host
+    disks:
+      - name: sqlite-data
+        mountPath: /app/sqlite
+        sizeGB: 1
