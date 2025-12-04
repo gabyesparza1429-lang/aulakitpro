@@ -23,7 +23,7 @@ if os.path.exists(env_file):
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
 
 # En producción, DEBUG debe ser False.
-DEBUG = env.bool('DEBUG', default=true)
+DEBUG = env.bool('DEBUG', default=false)
 
 
 # 🚨 CORRECCIÓN 2: Permite que Render acceda.
@@ -141,6 +141,7 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
 
 
 
