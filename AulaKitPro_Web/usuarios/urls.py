@@ -5,8 +5,8 @@ from . import views
 app_name = 'usuarios'
 
 urlpatterns = [
-    # 1. Ruta Home (usa dashboard)
-    path('', views.dashboard, name='home'),
+    # 1. Ruta Home (Ahora es la página pública)
+    path('', views.public_home, name='home'),
     
     # 2. Rutas de Auth
     path('login/', auth_views.LoginView.as_view(template_name='usuarios/login.html'), name='login'),

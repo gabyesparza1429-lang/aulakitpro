@@ -1,49 +1,47 @@
-"""
-Django settings for AulakitPro project.
-Versión Final Corregida para Render.
-"""
-
 import os
 from pathlib import Path
 import environ
-import dj_database_url # <--- 🚨 CORRECCIÓN 1: Importación necesaria para el bloque de base de datos.
+import dj_database_url
 
-# Inicializar django-environ
-env = environ.Env()
+# Inicializar django-environ para leer variables de entorno
+env = environ.Env(
+    # Define el tipo de dato y valor por defecto
+    DEBUG=(bool, False)
+)
 
-# Construir la ruta al directorio raíz
+# Ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# CORRECCIÓN PARA RENDER: Solo lee el .env si existe (para local)
+# Lee el archivo .env solo si existe (para desarrollo local)
 env_file = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
-# --- SEGURIDAD ---
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
+# --- CONFIGURACIÓN DE SEGURIDAD ---
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-super-secreta-de-emergencia')
+DEBUG = env('DEBUG')
 
-# En producción, DEBUG debe ser False.
-DEBUG = env.bool('DEBUG', default=False)
+# Hosts permitidos. Render necesita su propio host aquí.
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+RENDER_EXTERNAL_HOSTNAME = env('RENDER_EXTERNAL_HOSTNAME', default=None)
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-
-# 🚨 CORRECCIÓN 2: Permite que Render acceda.
-ALLOWED_HOSTS = ['*']
-
-
-# Application definition
+# --- APLICACIONES INSTALADAS (Método Explícito y Correcto) ---
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # Tus apps:
-    'usuarios',
-    # 'pagos', # Correctamente comentado
     'whitenoise.runserver_nostatic',
+    'django.contrib.staticfiles',
+    # Mis Apps (Usando la configuración explícita)
+    'usuarios.apps.UsuariosConfig',
+    'pagos.apps.PagosConfig',
 ]
 
+# --- MIDDLEWARE ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -57,13 +55,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'AulaKitPro_Core.urls'
 
+# --- PLANTILLAS (TEMPLATES) ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates',
-            BASE_DIR / 'usuarios' / 'templates',
-        ],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,70 +71,46 @@ TEMPLATES = [
         },
     },
 ]
+
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-# --- BASE DE DATOS (ESTO YA NO DEBE FALLAR) ---
-# Usa la DB de Render (Postgres) o SQLite temporal para el build.
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# --- BASE DE DATOS ---
+DATABASES = {
+    'default': env.db('DATABASE_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}')
+}
+DATABASES['default']['CONN_MAX_AGE'] = env.int('CONN_MAX_AGE', default=600)
 
-
-# Password validation (Deja esta sección intacta)
+# --- VALIDACIÓN DE CONTRASEÑAS ---
 AUTH_PASSWORD_VALIDATORS = [
-    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
+# --- INTERNACIONALIZACIÓN ---
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Mexico_City'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# --- ARCHIVOS ESTÁTICOS (CSS, JAVASCRIPT) ---
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    os.path.join(BASE_DIR, 'static'),
 ]
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
 
+# --- CONFIGURACIÓN GENERAL ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- STRIPE ---
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 
-# --- STRIPE Y OTROS ---
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy_clave_temporal')
-STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy_clave_temporal')
-
-# Configuración de usuario
+# --- AUTENTICACIÓN DE USUARIOS ---
 AUTH_USER_MODEL = 'usuarios.CustomUser'
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
-
-
-
-
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
