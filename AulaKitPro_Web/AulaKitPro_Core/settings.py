@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
+# AulaKitPro_Web/AulaKitPro_Core/settings.py
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # Tus apps:
     'usuarios',
-    # 'pagos', # Correctamente comentado
-    'whitenoise.runserver_nostatic',
+    # 🟢 DESCOMENTADA: Django necesita leer esta aplicación.
+    'pagos', 
 ]
 
 MIDDLEWARE = [
@@ -138,6 +141,7 @@ AUTH_USER_MODEL = 'usuarios.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
 
 
 
