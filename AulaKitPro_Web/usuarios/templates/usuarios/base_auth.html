@@ -1,47 +1,16 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AulaKitPro - Acceso{% endblock %}</title>
+    <title>{% block title %}AulaKitPro{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Definición de colores basada en el logo y index.html */
-        :root {
-            --color-primary-dark: #192A56; /* Azul Marino Profundo */
-            --color-accent-light: #7ED6DF; /* Cian/Aqua Brillante */
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-primary-dark); /* Fondo oscuro para la página de login */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        /* Estilo para el contenedor del formulario */
-        .auth-card {
-            background-color: #ffffff;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 420px;
-        }
-    </style>
 </head>
-<body>
-
-    <div class="auth-card p-8 sm:p-10">
-       <div class="text-center mb-8">
-            <img src="{% static 'img/logo.png' %}" alt="Logo de AulaKitPro" class="mx-auto w-40 h-auto" />
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md">
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            {% block content %}{% endblock %}
         </div>
-
-        {% block content %}
-        {% endblock %}
-
     </div>
-    
 </body>
 </html>

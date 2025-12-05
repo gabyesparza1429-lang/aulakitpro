@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pago Exitoso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-green-600">¡Gracias por tu compra!</h1>
+        <p class="mt-4 text-lg">Tu suscripción ha sido activada.</p>
+        <a href="{% url 'usuarios:dashboard' %}" class="mt-8 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Ir al Dashboard
+        </a>
+    </div>
+</body>
+</html>
