@@ -1,34 +1,26 @@
+# AulaKitPro_Web/usuarios/forms.py
+
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser
 
-# ---------------------------------------------------------
-# 1. Formulario para la CREACIÓN de usuarios (Registro Público)
-# ---------------------------------------------------------
 class CustomUserCreationForm(UserCreationForm):
-    class Meta:
+    """
+    Formulario para crear nuevos usuarios.
+    Hereda los campos base de Django (username, password, etc.)
+    y los adapta a nuestro CustomUser.
+    """
+    class Meta(UserCreationForm.Meta):
         model = CustomUser
-        # ✅ CORRECCIÓN FINAL: Solo incluimos los campos que el usuario debe llenar.
-        # Los campos de licencia (is_pro, stripe_customer_id, limite_generaciones_ia)
-        # se inicializan automáticamente con sus valores por defecto en models.py.
-        fields = ('username', 'email', 'first_name', 'last_name') 
+        # Campos que se mostrarán en el formulario de registro.
+        # Quitamos los campos que ya no existen en el modelo.
+        fields = ('username', 'email')
 
-    # Función crucial para asegurar que la contraseña se guarde cifrada y no como texto plano
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        password = self.cleaned_data.get("password")
-        if password:
-            user.set_password(password)
-        if commit:
-            user.save()
-        return user
-
-# ---------------------------------------------------------
-# 2. Formulario para la MODIFICACIÓN de usuarios (Panel Admin)
-# ---------------------------------------------------------
 class CustomUserChangeForm(UserChangeForm):
+    """
+    Formulario para actualizar usuarios existentes desde el panel de admin.
+    """
     class Meta:
         model = CustomUser
-        # Para el panel de administración (solo para ti), listamos todos los campos.
-        fields = ('username', 'email', 'first_name', 'last_name', 'is_active', 
-                  'is_staff', 'is_superuser', 'groups', 
-                  'is_pro', 'limite_generaciones_ia', 'stripe_customer_id')
+        # Campos que se podrán editar en el admin.
+        # Quitamos los campos que ya no existen en el modelo.
+        fields = ('username', 'email', 'limite_generaciones_ia')
