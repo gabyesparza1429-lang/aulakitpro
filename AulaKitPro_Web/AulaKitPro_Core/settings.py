@@ -1,54 +1,59 @@
 """
-Django settings for AulakitPro project.
-Versión Final Corregida para Render.
+Django settings for AulaKitPro project.
+Configuración unificada y optimizada para Render.
 """
 
 import os
 from pathlib import Path
 import environ
-import dj_database_url # <--- 🚨 CORRECCIÓN 1: Importación necesaria para el bloque de base de datos.
+import dj_database_url
 
 # Inicializar django-environ
-env = environ.Env()
+env = environ.Env(
+    # Define el tipo de dato y valor por defecto para DEBUG
+    DEBUG=(bool, False)
+)
 
-# Construir la ruta al directorio raíz
+# Ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# CORRECCIÓN PARA RENDER: Solo lee el .env si existe (para local)
+# Lee el archivo .env solo si existe (para desarrollo local)
 env_file = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
-# --- SEGURIDAD ---
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-de-emergencia-12345')
+# --- CONFIGURACIÓN DE SEGURIDAD ---
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-clave-super-secreta-de-emergencia')
 
-# En producción, DEBUG debe ser False.
-DEBUG = env.bool('DEBUG', default=False)
+# Usamos env.bool() para garantizar que el valor sea un booleano (práctica recomendada)
+DEBUG = env('DEBUG')
 
+# Hosts permitidos (Configuración segura para Render/Producción)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+RENDER_EXTERNAL_HOSTNAME = env('RENDER_EXTERNAL_HOSTNAME', default=None)
+if RENDER_EXTERNAL_HOSTNAME:
+    # Añade el host de Render automáticamente
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# 🚨 CORRECCIÓN 2: Permite que Render acceda.
-ALLOWED_HOSTS = ['*']
-
-
-# Application definition
-# AulaKitPro_Web/AulaKitPro_Core/settings.py
-
+# --- APLICACIONES INSTALADAS ---
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    # Necesario para el manejo de estáticos en desarrollo por Whitenoise
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    
-    # Tus apps:
-    'usuarios',
-    # 🟢 DESCOMENTADA: Django necesita leer esta aplicación.
-    'pagos', 
+    # Mis Apps (Usando la configuración explícita recomendada)
+    'usuarios.apps.UsuariosConfig',
+    'pagos.apps.PagosConfig',
 ]
 
+# --- MIDDLEWARE ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Whitenoise debe ir justo después de SecurityMiddleware
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,12 +65,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'AulaKitPro_Core.urls'
 
+# --- PLANTILLAS (TEMPLATES) ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'templates',
-            BASE_DIR / 'usuarios' / 'templates',
+            # Se usa os.path.join o Path, ambas válidas, aquí usamos os.path.join
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'usuarios', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -78,15 +85,16 @@ TEMPLATES = [
         },
     },
 ]
+
 WSGI_APPLICATION = 'AulaKitPro_Core.wsgi.application'
 
-# --- BASE DE DATOS (ESTO YA NO DEBE FALLAR) ---
-# Usa la DB de Render (Postgres) o SQLite temporal para el build.
+# --- BASE DE DATOS (Lógica robusta para Render) ---
+# Si existe DATABASE_URL (Producción/Render), la usa. Si no, usa SQLite (Desarrollo).
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
+            conn_max_age=env.int('CONN_MAX_AGE', default=600)
         )
     }
 else:
@@ -97,57 +105,49 @@ else:
         }
     }
 
-
-# Password validation (Deja esta sección intacta)
+# --- VALIDACIÓN DE CONTRASEÑAS ---
 AUTH_PASSWORD_VALIDATORS = [
-    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
+# --- INTERNACIONALIZACIÓN ---
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Mexico_City'
+TIME_ZONE = 'America/Mexico_City' # Se prefiere una zona horaria específica.
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# --- ARCHIVOS ESTÁTICOS (CSS, JAVASCRIPT) ---
 STATIC_URL = '/static/'
+# Directorio donde se recolectarán los archivos estáticos en producción
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Directorios donde buscar estáticos en desarrollo
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# Configuración de almacenamiento (Método moderno para Django 4.2+)
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
+    # Usa CompressedManifestStaticFilesStorage para Whitenoise en producción
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
+# --- CONFIGURACIÓN GENERAL ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- STRIPE ---
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 
-# --- STRIPE Y OTROS ---
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_dummy_clave_temporal')
-STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_dummy_clave_temporal')
-
-# Configuración de usuario
+# --- AUTENTICACIÓN DE USUARIOS ---
 AUTH_USER_MODEL = 'usuarios.CustomUser'
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
-
-
-
-
-
-
-
-
-
-
+LOGIN_URL = 'login' # Se usa el nombre de la URL, más flexible
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
