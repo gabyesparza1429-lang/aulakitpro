@@ -1,11 +1,11 @@
 asgiref
 certifi
 charset-normalizer
+dj-database-url
 Django
 django-environ
 gunicorn
 idna
-dj-database-url
 psycopg2-binary
 requests
 sqlparse
