@@ -107,23 +107,55 @@
 
         <div class="main">
             <div class="card">
-                <h2 class="text-xl font-bold mb-4 text-gray-800">¡Hola de nuevo, {{ user.username }}!</h2>
-                <p class="text-lg text-gray-600">
-                    Tu cuenta tiene el estado **GRATUITO** y tienes **10 Generaciones IA** restantes. 
-                </p>
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Generador de Contenido IA</h2>
+
+                {% if intentos_restantes > 0 and not is_pro %}
+                    <form>
+                        <div class="mb-4">
+                            <label for="topic" class="block text-gray-700 text-sm font-bold mb-2">Tema:</label>
+                            <input type="text" id="topic" name="topic" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej: La Revolución Francesa">
+                        </div>
+                        <div class="mb-4">
+                            <label for="content_type" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Contenido:</label>
+                            <select id="content_type" name="content_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option>Examen de opción múltiple</option>
+                                <option>Resumen detallado</option>
+                                <option>Guión para audio</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="px-6 py-3 font-bold text-white rounded-lg transition duration-200 shadow-md" style="background-color: var(--color-primary-dark); color: white;">
+                            Generar Contenido (Te quedan {{ intentos_restantes }} intentos)
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="text-center p-4 border-l-4 border-yellow-500 bg-yellow-100">
+                        <h3 class="text-lg font-bold text-yellow-800">¡Has agotado tus intentos gratuitos!</h3>
+                        <p class="text-yellow-700 mt-2">
+                            Para seguir creando contenido ilimitado, por favor, actualiza a nuestra versión PRO.
+                        </p>
+                    </div>
+                {% endif %}
             </div>
 
+            {% if intentos_restantes <= 0 or is_pro %}
             <div class="card">
                 <h2 class="text-xl font-bold mb-4" style="color: var(--color-primary-dark);">🚀 Suscripción PRO</h2>
                 <p class="mb-4 text-gray-600">
-                    Mejora a **PRO** para obtener generaciones IA ilimitadas y acceso a todas las plantillas exclusivas de AulaKitPro.
+                    {% if is_pro %}
+                        ¡Gracias por ser miembro PRO! Disfruta de acceso ilimitado a todas nuestras herramientas.
+                    {% else %}
+                        Mejora a **PRO** para obtener generaciones IA ilimitadas y acceso a todas las plantillas exclusivas de AulaKitPro.
+                    {% endif %}
                 </p>
-                <a href="{% url 'pagos:checkout' %}"
-   class="px-6 py-3 font-bold text-white rounded-lg transition duration-200 shadow-md" 
-   style="background-color: var(--color-accent-light); color: var(--color-primary-dark); text-decoration: none;">
-    Activar AulaKitPro PRO
-</a>
+                {% if not is_pro %}
+                    <a href="{% url 'pagos:checkout' %}"
+                       class="px-6 py-3 font-bold text-white rounded-lg transition duration-200 shadow-md"
+                       style="background-color: var(--color-accent-light); color: var(--color-primary-dark); text-decoration: none;">
+                        Activar AulaKitPro PRO
+                    </a>
+                {% endif %}
             </div>
+            {% endif %}
             
             </div>
     </div>
