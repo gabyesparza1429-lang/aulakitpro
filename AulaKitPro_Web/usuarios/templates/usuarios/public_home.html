@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a AulaKitPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10 text-center">
+        <h1 class="text-4xl font-bold">Bienvenido a AulaKitPro</h1>
+        <p class="mt-4">La mejor herramienta para educadores.</p>
+        <div class="mt-8">
+            <a href="{% url 'usuarios:login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Iniciar Sesión
+            </a>
+            <a href="{% url 'usuarios:registro' %}" class="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Registrarse
+            </a>
+        </div>
+    </div>
+</body>
+</html>

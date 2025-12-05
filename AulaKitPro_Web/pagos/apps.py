@@ -1,6 +1,6 @@
-# AulaKitPro_Web/usuarios/apps.py
+# AulaKitPro_Web/pagos/apps.py
 from django.apps import AppConfig
 
-class UsuariosConfig(AppConfig):
+class PagosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'usuarios'
+    name = 'pagos'
