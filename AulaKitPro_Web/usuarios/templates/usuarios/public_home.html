@@ -1,0 +1,25 @@
+{% extends "usuarios/base_auth.html" %}
+
+{% block title %}Bienvenido a AulaKitPro{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">Transforma tu Manera de Enseñar con AulaKitPro</h1>
+            <p class="lead mb-4">
+                Crea materiales educativos, exámenes y audios personalizados en segundos con el poder de la Inteligencia Artificial.
+                Diseñado por y para educadores.
+            </p>
+            <div class="card p-4">
+                <h2 class="h4 mb-3">Empieza Gratis</h2>
+                <p>Regístrate ahora y obtén <strong>10 generaciones de IA gratuitas</strong> para probar todo el potencial de nuestra plataforma.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{% url 'usuarios:registro' %}" class="btn btn-primary btn-lg me-md-2">Crear Cuenta Gratis</a>
+                    <a href="{% url 'usuarios:login' %}" class="btn btn-outline-secondary btn-lg">Ya tengo una cuenta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

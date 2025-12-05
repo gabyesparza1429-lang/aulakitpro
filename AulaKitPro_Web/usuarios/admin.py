@@ -1,24 +1,44 @@
+# AulaKitPro_Web/usuarios/admin.py
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserChangeForm 
 
 class CustomUserAdmin(UserAdmin):
-    # Conexión directa a los formularios corregidos
+    """
+    Configuración para mostrar y editar el CustomUser en el panel de admin.
+    """
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-    
-    # Campos que se muestran en la lista de usuarios
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_pro', 'limite_generaciones_ia')
-    
-    list_filter = ('is_pro', 'is_staff', 'is_superuser', 'is_active', 'groups')
-    
-    # Campos al MODIFICAR
-    fieldsets = UserAdmin.fieldsets + (
-        ('Información de Licencia y Pago', {'fields': ('is_pro', 'limite_generaciones_ia', 'stripe_customer_id')}),
-    )
-    
-    # IMPORTANTE: add_fieldsets ha sido eliminado
+    model = CustomUser
 
-# Registra tu modelo de usuario con tu configuración de administración personalizada
+    # Campos que se mostrarán en la lista de usuarios
+    # Eliminamos 'is_pro' porque ya no existe aquí.
+    list_display = [
+        'email',
+        'username',
+        'limite_generaciones_ia',
+        'is_staff',
+        'is_active',
+    ]
+
+    # Filtros que aparecerán en la barra lateral
+    # Eliminamos 'is_pro'.
+    list_filter = ('is_staff', 'is_active')
+
+    # Campos que se podrán buscar
+    search_fields = ('email', 'username')
+
+    # Orden por defecto
+    ordering = ('email',)
+
+    # Campos que se mostrarán al editar un usuario
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')}),
+        ('Personal info', {'fields': ('username', 'limite_generaciones_ia')}),
+    )
+
+# Registrar el modelo CustomUser con la configuración personalizada
 admin.site.register(CustomUser, CustomUserAdmin)
