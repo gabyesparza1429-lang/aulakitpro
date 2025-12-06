@@ -32,3 +32,13 @@ def registro(request):
 # ---------------------------------------------------------
 def prueba(request):
     return render(request, 'usuarios/prueba.html')
+
+# ---------------------------------------------------------
+# 4. VISTA PÚBLICA (HOME)
+# ---------------------------------------------------------
+def public_home(request):
+    """
+    Vista de la página principal pública.
+    """
+    # Simplemente renderiza la plantilla HTML para la página de inicio.
+    return render(request, 'usuarios/public_home.html')
