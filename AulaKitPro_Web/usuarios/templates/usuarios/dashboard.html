@@ -11,47 +11,47 @@
             --color-primary-dark: #192A56; /* Azul Marino Profundo */
             --color-accent-light: #7ED6DF; /* Cian / Aqua Brillante */
         }
-        
+
         /* Layout general similar a tu ejemplo */
         body { margin: 0; font-family: sans-serif; display: flex; height: 100vh; background-color: #f7f9fc; }
-        
+
         /* Sidebar (Barra Lateral) */
-        .sidebar { 
-            width: 250px; 
-            background: var(--color-primary-dark); 
-            color: #fff; 
-            height: 100vh; 
-            padding: 20px 10px; 
-            box-sizing: border-box; 
+        .sidebar {
+            width: 250px;
+            background: var(--color-primary-dark);
+            color: #fff;
+            height: 100vh;
+            padding: 20px 10px;
+            box-sizing: border-box;
             text-align: center;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
         }
         .sidebar img { width: 140px; height: auto; margin-bottom: 30px; }
-        .sidebar a { 
-            display: block; 
-            color: #fff; 
-            text-decoration: none; 
-            margin: 15px 0; 
+        .sidebar a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            margin: 15px 0;
             padding: 10px 15px;
-            font-size: 16px; 
+            font-size: 16px;
             cursor: pointer;
             border-radius: 6px;
             text-align: left;
         }
-        .sidebar a:hover, .sidebar a.active { 
+        .sidebar a:hover, .sidebar a.active {
             background-color: rgba(255, 255, 255, 0.1); /* Ligero hover */
             color: var(--color-accent-light);
         }
-        
+
         /* Contenido Principal */
         .content { flex: 1; display: flex; flex-direction: column; overflow: auto; }
-        .header { 
-            background: #ffffff; 
-            color: var(--color-primary-dark); 
-            padding: 15px 30px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .header {
+            background: #ffffff;
+            color: var(--color-primary-dark);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
         .header h1 { margin: 0; font-size: 24px; font-weight: 600; color: var(--color-primary-dark); }
@@ -81,12 +81,12 @@
 <body>
 
     <div class="sidebar">
-        <img src="{% static 'img/logo.png' %}" alt="AulaKitPro Logo"> 
-        
+        <img src="{% static 'img/logo.png' %}" alt="AulaKitPro Logo">
+
         <h3 class="text-sm text-gray-400 mb-4">Menú Principal</h3>
 
         <a href="{% url 'usuarios:dashboard' %}" class="active">🏠 Dashboard</a>
-        <a href="#">📝 Generador de Contenido IA</a>
+        <a href="{% url 'usuarios:generador_contenido' %}">📝 Generador de Contenido IA</a>
         <a href="#">📚 Mis Cursos</a>
         <a href="#">⚙️ Configuración</a>
 
@@ -106,10 +106,11 @@
         </div>
 
         <div class="main">
+            {% block dashboard_content %}
             <div class="card">
                 <h2 class="text-xl font-bold mb-4 text-gray-800">¡Hola de nuevo, {{ user.username }}!</h2>
                 <p class="text-lg text-gray-600">
-                    Tu cuenta tiene el estado **GRATUITO** y tienes **10 Generaciones IA** restantes. 
+                    Tu cuenta tiene el estado **GRATUITO** y tienes **10 Generaciones IA** restantes.
                 </p>
             </div>
 
@@ -119,13 +120,13 @@
                     Mejora a **PRO** para obtener generaciones IA ilimitadas y acceso a todas las plantillas exclusivas de AulaKitPro.
                 </p>
                 <a href="{% url 'pagos:checkout' %}"
-   class="px-6 py-3 font-bold text-white rounded-lg transition duration-200 shadow-md" 
-   style="background-color: var(--color-accent-light); color: var(--color-primary-dark); text-decoration: none;">
-    Activar AulaKitPro PRO
-</a>
+                   class="px-6 py-3 font-bold text-white rounded-lg transition duration-200 shadow-md"
+                   style="background-color: var(--color-accent-light); color: var(--color-primary-dark); text-decoration: none;">
+                    Activar AulaKitPro PRO
+                </a>
             </div>
-            
-            </div>
+            {% endblock %}
+        </div>
     </div>
 
 </body>

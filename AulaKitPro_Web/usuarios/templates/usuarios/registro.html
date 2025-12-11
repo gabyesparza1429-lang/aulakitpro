@@ -11,7 +11,10 @@
         {% for field in form %}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
+
+                <!-- Aplicando clases de Tailwind directamente al campo del formulario -->
+                {{ field.as_widget.attrs.class|add:"w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" }}
+
                 {% for error in field.errors %}
                     <p class="text-sm text-red-600 mt-1">{{ error }}</p>
                 {% endfor %}
@@ -19,8 +22,8 @@
         {% endfor %}
 
         <button type="submit" 
-                class="w-full py-3 px-4 rounded-lg font-semibold text-lg text-white transition duration-200" 
-                style="background-color: var(--color-primary-dark);">
+                class="w-full py-3 px-4 rounded-lg font-semibold text-lg transition duration-300 ease-in-out transform hover:scale-105"
+                style="background-color: var(--color-accent-light); color: var(--color-primary-dark);">
             Registrarme
         </button>
     </form>

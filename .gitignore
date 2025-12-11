@@ -1,0 +1,22 @@
+# Archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Base de datos de desarrollo
+db.sqlite3
+*.sqlite3
+
+# Archivos de entorno virtual
+venv/
+env/
+.env
+
+# Archivos de registro
+*.log
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/

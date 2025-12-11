@@ -1,0 +1,39 @@
+{% extends "usuarios/dashboard.html" %}
+
+{% block dashboard_content %}
+<div class="bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Generador de Contenido IA</h2>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <div>
+            <label for="user_prompt" class="block text-sm font-medium text-gray-700 mb-2">
+                Describe el contenido que quieres generar:
+            </label>
+            <textarea id="user_prompt" name="user_prompt" rows="10"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ej: Escribe un guion para un video de TikTok de 30 segundos sobre consejos de productividad..."></textarea>
+        </div>
+
+        <div>
+            <button type="submit"
+                    class="w-full py-3 px-4 rounded-lg font-semibold text-lg text-white transition duration-200"
+                    style="background-color: var(--color-primary-dark);">
+                ✨ Generar Contenido
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-gray-200">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Resultado:</h3>
+        <div id="generated_content" class="bg-gray-50 p-6 rounded-lg min-h-[200px] text-gray-700 whitespace-pre-wrap">
+            {% if generated_content %}
+                {{ generated_content }}
+            {% else %}
+                <span class="text-gray-400">Aquí aparecerá el contenido generado por la IA.</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
