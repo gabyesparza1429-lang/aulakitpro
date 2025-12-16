@@ -34,11 +34,22 @@ def prueba(request):
     return render(request, 'usuarios/prueba.html')
 
 # ---------------------------------------------------------
-# 4. VISTA PÚBLICA (HOME)
+# 4. VISTA GENERADOR DE CONTENIDO IA
 # ---------------------------------------------------------
-def public_home(request):
+@login_required(login_url='/login/')
+def generador_contenido(request):
     """
-    Vista de la página principal pública.
+    Página para el generador de contenido IA.
+    Maneja tanto la visualización del formulario (GET) como el procesamiento de datos (POST).
     """
-    # Simplemente renderiza la plantilla HTML para la página de inicio.
-    return render(request, 'usuarios/public_home.html')
+    generated_content = ""
+    if request.method == 'POST':
+        user_prompt = request.POST.get('user_prompt', '')
+        
+        # Aquí iría la lógica para llamar a la IA.
+        # Por ahora, simplemente simularemos una respuesta.
+        generated_content = f"Contenido generado basado en la siguiente instrucción: '{user_prompt}'"
+
+    return render(request, 'usuarios/generador_contenido.html', {
+        'generated_content': generated_content
+    })
