@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .forms import CustomAuthenticationForm  # Importar el formulario personalizado
 
 app_name = 'usuarios'
 
@@ -9,7 +10,11 @@ urlpatterns = [
     path('', views.registro, name='registro'),
 
     # Rutas de Autenticación
-    path('login/', auth_views.LoginView.as_view(template_name='usuarios/login.html'), name='login'),
+    # Se actualiza LoginView para usar el formulario con estilos de Tailwind.
+    path('login/', auth_views.LoginView.as_view(
+        template_name='usuarios/login.html',
+        authentication_form=CustomAuthenticationForm
+    ), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     # Se mantiene una ruta explícita /registro/ por si se usa en algún enlace.
