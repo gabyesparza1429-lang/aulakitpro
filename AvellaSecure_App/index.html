@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvellaSecure - Control de Acceso</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Pantalla de Login -->
+    <div id="login-container">
+        <h1>Bienvenido a AvellaSecure</h1>
+        <p>Ingresa tu correo para recibir tu enlace de acceso.</p>
+        <input type="email" id="email-input" placeholder="tu.correo@ejemplo.com" autocomplete="email">
+        <button id="login-button">Enviar Enlace de Acceso</button>
+        <p id="message-area" class="message"></p> <!-- Área para mostrar mensajes al usuario -->
+    </div>
+
+    <!-- Pantalla Principal (inicialmente oculta) -->
+    <div id="main-container" class="hidden">
+        <div id="user-info">
+            <!-- El saludo al usuario se insertará aquí, ej: "Departamento A-101" -->
+        </div>
+        <div id="access-buttons-container">
+            <!-- Los botones de acceso se generarán dinámicamente aquí -->
+        </div>
+        <button id="logout-button">Cerrar Sesión</button>
+        <p id="main-message-area" class="message"></p> <!-- Área para mensajes en la pantalla principal -->
+    </div>
+
+    <!-- Importamos el script principal de la aplicación -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
