@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvellaSecure - Control de Acceso</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Logo del Condominio -->
+        <img src="logo.png" alt="Logo del Condominio" class="logo">
+
+        <!-- Pantalla de Configuración Inicial -->
+        <div id="config-container" class="hidden">
+            <h1>Configuración Inicial</h1>
+            <p>Ingresa tus credenciales de Supabase. Solo tendrás que hacer esto una vez.</p>
+            <input type="text" id="supabase-url-input" placeholder="Pega aquí tu URL de Supabase">
+            <input type="password" id="supabase-key-input" placeholder="Pega aquí tu Llave Pública (anon key)">
+            <button id="save-config-button">Guardar Configuración</button>
+            <p id="config-message-area" class="message"></p>
+        </div>
+
+        <!-- Pantalla de Login -->
+        <div id="login-container" class="hidden">
+            <h1>Bienvenido a AvellaSecure</h1>
+            <p>Ingresa tu correo para recibir tu enlace de acceso.</p>
+            <input type="email" id="email-input" placeholder="tu.correo@ejemplo.com" autocomplete="email">
+            <button id="login-button">Enviar Enlace de Acceso</button>
+            <p id="message-area" class="message"></p>
+        </div>
+
+        <!-- Pantalla Principal -->
+        <div id="main-container" class="hidden">
+            <div id="user-info"></div>
+            <div id="access-buttons-container"></div>
+            <button id="logout-button">Cerrar Sesión</button>
+            <p id="main-message-area" class="message"></p>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
