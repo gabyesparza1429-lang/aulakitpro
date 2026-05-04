@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophia - Asistente Estratégica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <h1>Sophia</h1>
+                <p>NeuroClarity</p>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active" data-target="dashboard"><i class="fas fa-th-large"></i> Dashboard</li>
+                    <li data-target="projects"><i class="fas fa-briefcase"></i> Proyectos</li>
+                    <li data-target="wellness"><i class="fas fa-leaf"></i> Bienestar</li>
+                    <li data-target="health"><i class="fas fa-heartbeat"></i> Salud</li>
+                    <li data-target="email"><i class="fas fa-envelope"></i> Filtro Email</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-info">
+                    <h2 id="section-title">Dashboard</h2>
+                    <p id="date-display"></p>
+                </div>
+                <div class="user-profile">
+                    <span>Hola, Gaby</span>
+                    <div class="avatar">G</div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard Overview -->
+                <div id="dashboard" class="view">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-tasks"></i>
+                            <h3>Proyecto Activo</h3>
+                            <p>NeuroClarity: Consultoría</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Salud</h3>
+                            <p>Glucosa: 113 mg/dL</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-home"></i>
+                            <h3>Lote 71</h3>
+                            <p>Próximo: Cercas vivas</p>
+                        </div>
+                    </div>
+
+                    <div class="interaction-card">
+                        <div class="chat-display" id="chat-display">
+                            <div class="message system">
+                                <p>Hola Gaby, soy Sophia. Estoy lista para asistirte. ¿Qué proyecto retomamos hoy?</p>
+                            </div>
+                        </div>
+
+                        <div class="input-controls">
+                            <button id="voice-btn" class="voice-btn"><i class="fas fa-microphone"></i></button>
+                            <input type="text" id="user-input" placeholder="Escribe un comando o di 'Sophia'...">
+                            <button id="send-btn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                        <div class="status-bar">
+                            <span id="voice-status">Micrófono inactivo</span>
+                            <span class="command-tip">Usa "ya" para continuar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
