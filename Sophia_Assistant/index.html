@@ -25,6 +25,7 @@
                     <li data-target="wellness"><i class="fas fa-leaf"></i> Bienestar</li>
                     <li data-target="health"><i class="fas fa-heartbeat"></i> Salud</li>
                     <li data-target="email"><i class="fas fa-envelope"></i> Filtro Email</li>
+                    <li data-target="config" class="config-nav"><i class="fas fa-brain"></i> Configurar Cerebro</li>
                 </ul>
             </nav>
         </aside>
@@ -44,7 +45,7 @@
 
             <div class="content-area">
                 <!-- Dashboard Overview -->
-                <div id="dashboard" class="view">
+                <div id="dashboard-view" class="view active">
                     <div class="stats-grid">
                         <div class="stat-card">
                             <i class="fas fa-tasks"></i>
@@ -79,6 +80,28 @@
                             <span id="voice-status">Micrófono inactivo</span>
                             <span class="command-tip">Usa "ya" para continuar</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Config View -->
+                <div id="config-view" class="view">
+                    <div class="config-card">
+                        <h3>Conectar Cerebro de IA</h3>
+                        <p class="config-desc">Configura aquí la conexión con Google Gemini para que Sophia pueda pensar y recordar tus proyectos.</p>
+
+                        <div class="form-group">
+                            <label for="api-key">Tu Google API Key:</label>
+                            <input type="password" id="api-key" placeholder="Pega tu clave aquí...">
+                            <small>Consíguela gratis en Google AI Studio.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="system-instruction">Memoria Maestra de Sophia (Datos y Proyectos):</label>
+                            <textarea id="system-instruction" rows="10" placeholder="Pega aquí todo lo que quieres que Sophia recuerde: tus metas, datos de salud, detalles de Lote 71 y NeuroClarity..."></textarea>
+                        </div>
+
+                        <button id="save-config" class="save-btn">Guardar Memoria y Activar Cerebro</button>
+                        <div id="config-status" class="config-status"></div>
                     </div>
                 </div>
             </div>
