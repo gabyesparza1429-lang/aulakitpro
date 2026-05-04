@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Sophia Iniciada");
+
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
     const userInput = document.getElementById('user-input');
@@ -27,7 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Navigation Logic ---
     function switchView(target) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        console.log("Cambiando a vista:", target);
+
+        // Hide all views
+        document.querySelectorAll('.view').forEach(v => {
+            v.classList.remove('active');
+            v.style.display = 'none';
+        });
+
+        // Remove active class from all nav items
         document.querySelectorAll('nav li').forEach(li => li.classList.remove('active'));
 
         const viewId = `${target}-view`;
@@ -36,13 +46,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (targetView) {
             targetView.classList.add('active');
+            targetView.style.display = 'block';
             if (navItem) navItem.classList.add('active');
             sectionTitle.innerText = navItem ? navItem.innerText.trim() : "Dashboard";
+        } else {
+            // Fallback to dashboard
+            const dash = document.getElementById('dashboard-view');
+            dash.classList.add('active');
+            dash.style.display = 'block';
+            document.querySelector('nav li[data-target="dashboard"]').classList.add('active');
+            sectionTitle.innerText = "Dashboard";
         }
     }
 
+    // Attach click events to nav items
     document.querySelectorAll('nav li').forEach(li => {
-        li.addEventListener('click', () => switchView(li.getAttribute('data-target')));
+        li.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = li.getAttribute('data-target');
+            if (target) switchView(target);
+        });
     });
 
     // --- Gemini API Logic ---
@@ -61,18 +84,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
             return data.candidates[0].content.parts[0].text;
         } catch (e) {
-            console.error(e);
+            console.error("Error API Gemini:", e);
             return null;
         }
     }
 
     // --- Auto Analysis of Memory ---
     async function analyzeMemory() {
-        if (!config.apiKey || !config.systemInstruction) return;
+        if (!config.apiKey || !config.systemInstruction) {
+            console.log("Falta configuración para analizar memoria");
+            return;
+        }
 
         console.log("Sophia analizando memoria...");
+
+        const cards = document.querySelectorAll('.card-value');
+        cards.forEach(c => c.innerText = "Analizando...");
 
         const extractionPrompt = `
         Analiza esta información: "${config.systemInstruction}"
@@ -81,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "proyecto": "Nombre corto del proyecto actual",
             "salud": "Glucosa y Colesterol actual",
             "bienestar": "Próximo paso en Lote 71",
-            "detalles_proyectos": "Resumen en HTML para lista",
-            "detalles_salud": "Tabla HTML con indicadores",
+            "detalles_proyectos": "Resumen en HTML (usa <ul> y <li>)",
+            "detalles_salud": "Tabla HTML (usa <table>, <tr>, <td>) con indicadores",
             "detalles_bienestar": "Resumen HTML de Lote 71"
         }
         `;
@@ -90,38 +120,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawJson = await callGemini(extractionPrompt, true);
         if (rawJson) {
             try {
-                // Limpiar posible formato markdown de la IA
                 const cleanJson = rawJson.replace(/```json|```/g, '').trim();
                 const data = JSON.parse(cleanJson);
 
                 // Actualizar Dashboard
-                document.querySelector('#card-project .card-value').innerText = data.proyecto;
-                document.querySelector('#card-health .card-value').innerText = data.salud;
-                document.querySelector('#card-wellness .card-value').innerText = data.bienestar;
+                document.querySelector('#card-project .card-value').innerText = data.proyecto || "No detectado";
+                document.querySelector('#card-health .card-value').innerText = data.salud || "No detectado";
+                document.querySelector('#card-wellness .card-value').innerText = data.bienestar || "No detectado";
 
                 // Actualizar Vistas
-                document.getElementById('projects-content').innerHTML = data.detalles_proyectos;
-                document.getElementById('health-content').innerHTML = data.detalles_salud;
-                document.getElementById('wellness-content').innerHTML = data.detalles_bienestar;
+                document.getElementById('projects-content').innerHTML = data.detalles_proyectos || "<p>Sin datos</p>";
+                document.getElementById('health-content').innerHTML = data.detalles_salud || "<p>Sin datos</p>";
+                document.getElementById('wellness-content').innerHTML = data.detalles_bienestar || "<p>Sin datos</p>";
 
             } catch (e) {
-                console.error("Error parseando memoria", e);
+                console.error("Error parseando memoria:", e);
+                cards.forEach(c => c.innerText = "Error de formato");
             }
+        } else {
+            cards.forEach(c => c.innerText = "Error de conexión");
         }
     }
 
     // Initial analysis
-    analyzeMemory();
+    if (config.apiKey && config.systemInstruction) {
+        analyzeMemory();
+    }
 
     // --- Configuration Logic ---
-    saveConfigBtn.addEventListener('click', () => {
+    saveConfigBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         config.apiKey = apiKeyInput.value.trim();
         config.systemInstruction = systemInstructionInput.value.trim();
+
+        if (!config.apiKey) {
+            alert("Por favor ingresa tu API Key");
+            return;
+        }
+
         localStorage.setItem('sophia_api_key', config.apiKey);
         localStorage.setItem('sophia_system_instruction', config.systemInstruction);
-        configStatusDisplay.innerText = "¡Cerebro actualizado!";
+
+        configStatusDisplay.innerText = "¡Cerebro actualizado y guardado!";
         configStatusDisplay.className = "config-status success";
+
         analyzeMemory();
+
         setTimeout(() => {
             configStatusDisplay.innerText = "";
             switchView('dashboard');
@@ -150,7 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const responseText = await callGemini(text);
         const thinkingMsg = document.getElementById(thinkingId);
-        if (thinkingMsg) thinkingMsg.innerHTML = `<p>${responseText || 'Error de conexión'}</p>`;
+        if (thinkingMsg) thinkingMsg.innerHTML = `<p>${responseText || 'Lo siento Gaby, tuve un problema al procesar eso. Revisa tu conexión.'}</p>`;
+
         if (responseText) {
             const utter = new SpeechSynthesisUtterance(responseText);
             utter.lang = 'es-ES';
@@ -167,7 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chatDisplay.scrollTop = chatDisplay.scrollHeight;
     }
 
-    sendBtn.addEventListener('click', () => handleMessage(userInput.value));
+    sendBtn.addEventListener('click', (e) => { e.preventDefault(); handleMessage(userInput.value); });
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
-    voiceBtn.addEventListener('click', () => { if (recognition) recognition.start(); });
+    voiceBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (recognition) {
+            try {
+                recognition.start();
+            } catch(e) {
+                console.log("Reconocimiento ya activo");
+            }
+        }
+    });
 });
