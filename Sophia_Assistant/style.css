@@ -78,6 +78,11 @@ nav li:hover, nav li.active {
     background-color: var(--lavanda-dark);
 }
 
+.config-nav {
+    margin-top: auto;
+    border: 1px dashed rgba(255,255,255,0.5);
+}
+
 /* Main Content Styles */
 .main-content {
     flex: 1;
@@ -115,6 +120,15 @@ header {
     align-items: center;
     justify-content: center;
     font-weight: 600;
+}
+
+/* Views Logic */
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
 }
 
 /* Dashboard Widgets */
@@ -175,6 +189,7 @@ header {
     padding: 1rem;
     border-radius: 12px;
     line-height: 1.5;
+    white-space: pre-wrap;
 }
 
 .message.system {
@@ -198,16 +213,16 @@ header {
     align-items: center;
 }
 
-input[type="text"] {
+input[type="text"], input[type="password"], textarea {
     flex: 1;
     padding: 0.8rem 1.2rem;
     border: 1px solid #ddd;
-    border-radius: 25px;
+    border-radius: 8px;
     font-family: var(--font-main);
     outline: none;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     border-color: var(--lavanda);
 }
 
@@ -234,10 +249,6 @@ input[type="text"]:focus {
     color: white;
 }
 
-.voice-btn:active, .send-btn:active {
-    transform: scale(0.9);
-}
-
 .status-bar {
     padding: 0.5rem 1.5rem 1rem;
     display: flex;
@@ -246,6 +257,74 @@ input[type="text"]:focus {
     color: #888;
 }
 
+/* Config Card Styles */
+.config-card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.config-card h3 {
+    margin-bottom: 1rem;
+    color: var(--lavanda-dark);
+}
+
+.config-desc {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--lavanda-dark);
+    font-weight: 300;
+}
+
+.save-btn {
+    background-color: var(--lavanda);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.save-btn:hover {
+    background-color: var(--lavanda-dark);
+}
+
+.config-status {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.config-status.success { color: #2ecc71; }
+.config-status.error { color: #e74c3c; }
+
+/* Utils */
 .voice-btn.recording {
     background-color: #ff4757;
     color: white;
