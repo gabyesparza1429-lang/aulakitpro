@@ -24,7 +24,4 @@ urlpatterns = [
 
     # Nueva ruta para el Generador de Contenido IA
     path('generador-contenido/', views.generador_contenido, name='generador_contenido'),
-
-    # Ruta para el Juego de Electricidad
-    path('jeu-electricite/', views.jeu_electricite, name='jeu_electricite'),
 ]
