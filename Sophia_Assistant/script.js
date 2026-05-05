@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Fields
     apiKeyInput.value = config.apiKey;
+    apiKeyInput.addEventListener('input', (e) => {
+        config.apiKey = e.target.value.trim();
+    });
     modelSelect.value = config.selectedModel;
     for (let key in configFields) {
         if (configFields[key]) configFields[key].value = config.memory[key];
@@ -89,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "gemini-1.5-flash-8b"
         ];
         const UNIQUE_MODELS = [...new Set(MODELS)];
+        const errorLogs = [];
 
         const globalContext = `
             PERSONALIDAD: ${config.memory.personality}
@@ -126,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (errMsg.includes("expired") || errMsg.includes("invalid")) {
                         return { error: "Tu API Key ha expirado o es inválida. Cámbiala en Configuración." };
                     }
+
+                    errorLogs.push(`${model}: ${errMsg}`);
+
                     if (errStatus === "RESOURCE_EXHAUSTED" || data.error.code === 429) continue;
                     if (data.error.code === 404) continue;
 
@@ -135,9 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.candidates && data.candidates[0]) {
                     return { text: data.candidates[0].content.parts[0].text, usedModel: model };
                 }
-            } catch (e) { continue; }
+            } catch (e) {
+                errorLogs.push(`${model}: Network Error`);
+                continue;
+            }
         }
-        return { error: "Sophia no pudo conectar. Revisa tu clave o internet." };
+        return { error: `Sophia no pudo conectar. Errores: ${errorLogs.join(" | ")}` };
     }
 
     function handleMagicContent(aiText) {
@@ -220,7 +230,17 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', () => handleMessage(userInput.value));
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
 
-    // --- REPARACIÓN DE GUARDADO (Fix v11) ---
+    // --- REPARACIÓN DE GUARDADO (Fix v12) ---
+    const clearCacheBtn = document.getElementById('clear-cache');
+    if (clearCacheBtn) {
+        clearCacheBtn.addEventListener('click', () => {
+            if (confirm("¿Estás segura? Esto borrará toda tu configuración y memoria de Sophia.")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        });
+    }
+
     saveConfigBtn.addEventListener('click', () => {
         const newKey = apiKeyInput.value.trim();
         const newModel = modelSelect.value;
@@ -231,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Actualizar estado interno INMEDIATAMENTE
+        // GUARDAR PRIMERO (Pedido de Gaby para que ya esté en el sistema)
         config.apiKey = newKey;
         config.selectedModel = newModel;
 
@@ -244,15 +264,18 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(`sophia_mem_${key}`, val);
         }
 
-        configStatusDisplay.innerText = "¡Cerebro actualizado! Guardando cambios...";
+        configStatusDisplay.innerText = "Guardando en el cerebro y verificando conexión...";
         configStatusDisplay.className = "config-status success";
 
-        // Intentar una conexión de prueba silenciosa antes de volver al dashboard
+        // Luego probamos
         callGemini("Hola", true).then(res => {
-            if (res.error && res.error.includes("leaked")) {
-                configStatusDisplay.innerText = "Error: Esta clave está bloqueada por Google. Necesitas una nueva.";
+            if (res.error) {
+                configStatusDisplay.innerText = "Guardado localmente, pero hay un error de conexión: " + res.error;
                 configStatusDisplay.className = "config-status error";
             } else {
+                configStatusDisplay.innerText = "¡Sophia conectada y configurada con éxito!";
+                configStatusDisplay.className = "config-status success";
+
                 analyzeMemory();
                 setTimeout(() => switchView('dashboard'), 1500);
             }
