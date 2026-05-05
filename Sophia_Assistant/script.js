@@ -28,9 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- State ---
+    const DEFAULT_KEY = 'AIzaSyBtK5fbV_JJ-yUdi6VTPdJE6kSOmi3RUe0';
     let config = {
-        apiKey: localStorage.getItem('sophia_api_key') || '',
-        selectedModel: localStorage.getItem('sophia_model') || 'gemini-1.5-flash',
+        apiKey: localStorage.getItem('sophia_api_key') || DEFAULT_KEY,
+        selectedModel: localStorage.getItem('sophia_model') || 'gemini-2.5-flash',
         memory: {
             personality: localStorage.getItem('sophia_mem_personality') || '',
             projects: localStorage.getItem('sophia_mem_projects') || '',
@@ -82,9 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const MODELS = [
             config.selectedModel,
-            "gemini-1.5-flash",
-            "gemini-2.0-flash-exp",
-            "gemini-1.5-pro"
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-2.0-flash",
+            "gemini-2.5-flash-lite"
         ];
         const UNIQUE_MODELS = [...new Set(MODELS)];
 
