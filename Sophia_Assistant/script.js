@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada v5 (Error Diagnostic)");
+    console.log("Sophia Iniciada v6 (Pro Model & Dynamic Menu)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceBtn = document.getElementById('voice-btn');
     const voiceStatus = document.getElementById('voice-status');
     const dateDisplay = document.getElementById('date-display');
-
     const sectionTitle = document.getElementById('section-title');
     const apiKeyInput = document.getElementById('api-key');
     const systemInstructionInput = document.getElementById('system-instruction');
     const saveConfigBtn = document.getElementById('save-config');
     const configStatusDisplay = document.getElementById('config-status');
+    const dynamicProjectsMenu = document.getElementById('dynamic-projects');
 
     // --- State ---
     let config = {
@@ -34,9 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
             v.style.display = 'none';
         });
         document.querySelectorAll('nav li').forEach(li => li.classList.remove('active'));
+
         const viewId = `${target}-view`;
         const targetView = document.getElementById(viewId);
         const navItem = document.querySelector(`nav li[data-target="${target}"]`);
+
         if (targetView) {
             targetView.classList.add('active');
             targetView.style.display = 'block';
@@ -45,17 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.querySelectorAll('nav li').forEach(li => {
+    document.querySelectorAll('nav li[data-target]').forEach(li => {
         li.addEventListener('click', (e) => {
-            e.preventDefault();
+            e.stopPropagation();
             switchView(li.getAttribute('data-target'));
         });
     });
 
-    // --- Gemini API Logic ---
+    // --- Gemini API Logic (Using Pro Model) ---
     async function callGemini(prompt, isSystemCall = false) {
-        if (!config.apiKey) return { error: "No hay API Key configurada" };
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.apiKey}`;
+        if (!config.apiKey) return { error: "Falta API Key" };
+
+        // Gaby solicitó gemini-1.5-pro-latest
+        const MODEL = "gemini-1.5-pro-latest";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${config.apiKey}`;
 
         const payload = {
             contents: [{ parts: [{ text: isSystemCall ? prompt : `Instrucción de Sistema: ${config.systemInstruction}\n\nUsuario dice: ${prompt}` }] }]
@@ -68,44 +73,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
-
-            if (data.error) {
-                return { error: data.error.message || "Error desconocido de Google" };
-            }
-            if (!data.candidates || !data.candidates[0]) {
-                return { error: "Google no devolvió una respuesta válida. Revisa tu saldo o límites." };
-            }
-
+            if (data.error) return { error: data.error.message };
             return { text: data.candidates[0].content.parts[0].text };
         } catch (e) {
-            return { error: "No hay conexión a internet o el servidor de Google está caído." };
+            return { error: "Error de conexión con Google" };
         }
     }
 
-    // --- Auto Analysis of Memory ---
+    // --- Auto Analysis of Memory (with Dynamic Projects) ---
     async function analyzeMemory() {
         if (!config.apiKey || !config.systemInstruction) return;
-
-        const cards = document.querySelectorAll('.card-value');
-        cards.forEach(c => c.innerText = "Analizando...");
 
         const extractionPrompt = `
         Analiza esta información: "${config.systemInstruction}"
         Responde estrictamente en formato JSON, sin texto extra:
         {
-            "proyecto": "Nombre corto proyecto",
-            "salud": "Glucosa/Colesterol",
-            "bienestar": "Próximo paso",
-            "detalles_proyectos": "Resumen HTML",
-            "detalles_salud": "Tabla HTML",
-            "detalles_bienestar": "Resumen HTML"
+            "proyecto_activo": "Nombre corto",
+            "salud_resumen": "Glucosa/Colesterol",
+            "bienestar_resumen": "Próximo paso Lote 71",
+            "lista_proyectos": ["Proyecto 1", "Proyecto 2"],
+            "detalles_proyectos": "HTML lista",
+            "detalles_salud": "HTML tabla",
+            "detalles_bienestar": "HTML resumen"
         }
         `;
 
         const result = await callGemini(extractionPrompt, true);
-
         if (result.error) {
-            cards.forEach(c => c.innerText = "Error: " + result.error);
             console.error(result.error);
             return;
         }
@@ -114,15 +108,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const cleanJson = result.text.replace(/```json|```/g, '').trim();
             const data = JSON.parse(cleanJson);
 
-            document.querySelector('#card-project .card-value').innerText = data.proyecto || "No detectado";
-            document.querySelector('#card-health .card-value').innerText = data.salud || "No detectado";
-            document.querySelector('#card-wellness .card-value').innerText = data.bienestar || "No detectado";
+            // Update Dashboard
+            document.querySelector('#card-project .card-value').innerText = data.proyecto_activo;
+            document.querySelector('#card-health .card-value').innerText = data.salud_resumen;
+            document.querySelector('#card-wellness .card-value').innerText = data.bienestar_resumen;
 
-            document.getElementById('projects-content').innerHTML = data.detalles_proyectos || "<p>Sin datos</p>";
-            document.getElementById('health-content').innerHTML = data.detalles_salud || "<p>Sin datos</p>";
-            document.getElementById('wellness-content').innerHTML = data.detalles_bienestar || "<p>Sin datos</p>";
+            // Update Modules
+            document.getElementById('projects-content').innerHTML = data.detalles_proyectos;
+            document.getElementById('health-content').innerHTML = data.detalles_salud;
+            document.getElementById('wellness-content').innerHTML = data.detalles_bienestar;
+
+            // --- Dynamic Projects Menu ---
+            dynamicProjectsMenu.innerHTML = '';
+            if (data.lista_proyectos) {
+                data.lista_proyectos.forEach(pName => {
+                    const li = document.createElement('li');
+                    li.className = 'project-item';
+                    li.innerHTML = `<i class="fas fa-chevron-right" style="font-size:0.7rem"></i> ${pName}`;
+                    li.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        switchView('projects');
+                        sectionTitle.innerText = "Proyecto: " + pName;
+                    });
+                    dynamicProjectsMenu.appendChild(li);
+                });
+            }
+
         } catch (e) {
-            cards.forEach(c => c.innerText = "Error de formato en la respuesta");
+            console.error("Error parseando memoria", e);
         }
     }
 
@@ -131,47 +144,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Configuration Logic ---
     saveConfigBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const testKey = apiKeyInput.value.trim();
-        configStatusDisplay.innerText = "Verificando conexión...";
-        configStatusDisplay.className = "config-status";
+        config.apiKey = apiKeyInput.value.trim();
+        config.systemInstruction = systemInstructionInput.value.trim();
 
-        // Probar conexión antes de guardar
-        const testPrompt = "Hola, responde solo 'ok'";
-        const API_URL_TEST = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${testKey}`;
+        localStorage.setItem('sophia_api_key', config.apiKey);
+        localStorage.setItem('sophia_system_instruction', config.systemInstruction);
 
-        try {
-            const resp = await fetch(API_URL_TEST, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: testPrompt }] }] })
-            });
-            const data = await resp.json();
+        configStatusDisplay.innerText = "¡Sophia activada! Conectando...";
+        configStatusDisplay.className = "config-status success";
 
-            if (data.error) {
-                configStatusDisplay.innerText = "Error: " + data.error.message;
-                configStatusDisplay.className = "config-status error";
-                return;
-            }
-
-            // Si funciona, guardar todo
-            config.apiKey = testKey;
-            config.systemInstruction = systemInstructionInput.value.trim();
-            localStorage.setItem('sophia_api_key', config.apiKey);
-            localStorage.setItem('sophia_system_instruction', config.systemInstruction);
-
-            configStatusDisplay.innerText = "¡Conexión Exitosa! Sophia activada.";
-            configStatusDisplay.className = "config-status success";
-
-            analyzeMemory();
-            setTimeout(() => switchView('dashboard'), 1500);
-
-        } catch (e) {
-            configStatusDisplay.innerText = "Error de red. Revisa tu internet.";
-            configStatusDisplay.className = "config-status error";
-        }
+        await analyzeMemory();
+        setTimeout(() => switchView('dashboard'), 1500);
     });
 
-    // --- Chat Logic ---
+    // --- Interaction ---
     const synth = window.speechSynthesis;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
@@ -180,40 +166,37 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition = new SpeechRecognition();
         recognition.lang = 'es-ES';
         recognition.onstart = () => { voiceStatus.innerText = "Escuchando..."; voiceBtn.classList.add('recording'); };
-        recognition.onresult = (e) => { const t = e.results[0][0].transcript; userInput.value = t; handleMessage(t); };
+        recognition.onresult = (e) => { handleMessage(e.results[0][0].transcript); };
         recognition.onend = () => { voiceStatus.innerText = "Micrófono inactivo"; voiceBtn.classList.remove('recording'); };
     }
 
     async function handleMessage(text) {
         if (!text.trim()) return;
         addMessage(text, 'user');
-        userInput.value = '';
         const thinkingId = Date.now();
-        addMessage("Sophia está pensando...", 'system', thinkingId);
+        addMessage("Sophia pensando...", 'system', thinkingId);
 
         const result = await callGemini(text);
-        const thinkingMsg = document.getElementById(thinkingId);
+        const msg = document.getElementById(thinkingId);
+        if (msg) msg.innerHTML = `<p>${result.error || result.text}</p>`;
 
-        if (result.error) {
-            thinkingMsg.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
-        } else {
-            thinkingMsg.innerHTML = `<p>${result.text}</p>`;
-            const utter = new SpeechSynthesisUtterance(result.text);
-            utter.lang = 'es-ES';
-            synth.speak(utter);
+        if (result.text) {
+            const ut = new SpeechSynthesisUtterance(result.text);
+            ut.lang = 'es-ES';
+            synth.speak(ut);
         }
     }
 
     function addMessage(text, sender, id = null) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${sender}`;
-        if (id) msgDiv.id = id;
-        msgDiv.innerHTML = `<p>${text}</p>`;
-        chatDisplay.appendChild(msgDiv);
+        const d = document.createElement('div');
+        d.className = `message ${sender}`;
+        if (id) d.id = id;
+        d.innerHTML = `<p>${text}</p>`;
+        chatDisplay.appendChild(d);
         chatDisplay.scrollTop = chatDisplay.scrollHeight;
     }
 
-    sendBtn.addEventListener('click', (e) => { e.preventDefault(); handleMessage(userInput.value); });
+    sendBtn.addEventListener('click', () => handleMessage(userInput.value));
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
-    voiceBtn.addEventListener('click', (e) => { e.preventDefault(); if (recognition) recognition.start(); });
+    voiceBtn.addEventListener('click', () => { if (recognition) recognition.start(); });
 });
