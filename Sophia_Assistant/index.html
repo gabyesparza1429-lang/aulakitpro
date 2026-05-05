@@ -44,23 +44,23 @@
             </header>
 
             <div class="content-area">
-                <!-- Dashboard Overview -->
+                <!-- Dashboard View -->
                 <div id="dashboard-view" class="view active">
                     <div class="stats-grid">
-                        <div class="stat-card">
+                        <div class="stat-card" id="card-project">
                             <i class="fas fa-tasks"></i>
                             <h3>Proyecto Activo</h3>
-                            <p>NeuroClarity: Consultoría</p>
+                            <p class="card-value">Analizando memoria...</p>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" id="card-health">
                             <i class="fas fa-chart-line"></i>
                             <h3>Salud</h3>
-                            <p>Glucosa: 113 mg/dL</p>
+                            <p class="card-value">Analizando memoria...</p>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" id="card-wellness">
                             <i class="fas fa-home"></i>
-                            <h3>Lote 71</h3>
-                            <p>Próximo: Cercas vivas</p>
+                            <h3>Próximo Paso</h3>
+                            <p class="card-value">Analizando memoria...</p>
                         </div>
                     </div>
 
@@ -83,6 +83,46 @@
                     </div>
                 </div>
 
+                <!-- Projects View -->
+                <div id="projects-view" class="view">
+                    <div class="info-card">
+                        <h3>Módulo: Proyectos (Money-Makers)</h3>
+                        <div id="projects-content" class="dynamic-content">
+                            <p>Analizando tus proyectos en NeuroClarity...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wellness View -->
+                <div id="wellness-view" class="view">
+                    <div class="info-card">
+                        <h3>Módulo: Bienestar (Lote 71)</h3>
+                        <div id="wellness-content" class="dynamic-content">
+                            <p>Consultando el estado de Lote 71...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health View -->
+                <div id="health-view" class="view">
+                    <div class="info-card">
+                        <h3>Módulo: Clínica Personal</h3>
+                        <div id="health-content" class="dynamic-content">
+                            <p>Cargando tus indicadores de salud...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email View -->
+                <div id="email-view" class="view">
+                    <div class="info-card">
+                        <h3>Módulo: Filtro Inteligente Email</h3>
+                        <div id="email-content" class="dynamic-content">
+                            <p>Esperando conexión con tu historial de correos...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Config View -->
                 <div id="config-view" class="view">
                     <div class="config-card">
@@ -97,7 +137,7 @@
 
                         <div class="form-group">
                             <label for="system-instruction">Memoria Maestra de Sophia (Datos y Proyectos):</label>
-                            <textarea id="system-instruction" rows="10" placeholder="Pega aquí todo lo que quieres que Sophia recuerde: tus metas, datos de salud, detalles de Lote 71 y NeuroClarity..."></textarea>
+                            <textarea id="system-instruction" rows="10" placeholder="Pega aquí todo lo que quieres que Sophia recuerde..."></textarea>
                         </div>
 
                         <button id="save-config" class="save-btn">Guardar Memoria y Activar Cerebro</button>

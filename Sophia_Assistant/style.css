@@ -164,6 +164,49 @@ header {
     font-size: 1.1rem;
 }
 
+/* Info Cards & Dynamic Content */
+.info-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.info-card h3 {
+    margin-bottom: 1.5rem;
+    color: var(--lavanda-dark);
+}
+
+.dynamic-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.dynamic-content th, .dynamic-content td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.dynamic-content th {
+    background-color: var(--bg-arena);
+    color: var(--lavanda-dark);
+    font-weight: 600;
+}
+
+.dynamic-content ul {
+    list-style: none;
+}
+
+.dynamic-content li {
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 3px solid var(--lavanda);
+}
+
 /* Chat/Interaction Card */
 .interaction-card {
     background: var(--white);
@@ -222,10 +265,6 @@ input[type="text"], input[type="password"], textarea {
     outline: none;
 }
 
-input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-    border-color: var(--lavanda);
-}
-
 .voice-btn, .send-btn {
     width: 45px;
     height: 45px;
@@ -265,39 +304,6 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-.config-card h3 {
-    margin-bottom: 1rem;
-    color: var(--lavanda-dark);
-}
-
-.config-desc {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 2rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.form-group input, .form-group textarea {
-    width: 100%;
-}
-
-.form-group small {
-    display: block;
-    margin-top: 0.4rem;
-    color: var(--lavanda-dark);
-    font-weight: 300;
-}
-
 .save-btn {
     background-color: var(--lavanda);
     color: white;
@@ -307,11 +313,6 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     font-weight: 600;
     cursor: pointer;
     width: 100%;
-    transition: background 0.3s;
-}
-
-.save-btn:hover {
-    background-color: var(--lavanda-dark);
 }
 
 .config-status {
