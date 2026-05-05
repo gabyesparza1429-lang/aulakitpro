@@ -28,10 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- State ---
-    const DEFAULT_KEY = 'AIzaSyBtK5fbV_JJ-yUdi6VTPdJE6kSOmi3RUe0';
+    const DEFAULT_KEY = '';
     let config = {
         apiKey: localStorage.getItem('sophia_api_key') || DEFAULT_KEY,
-        selectedModel: localStorage.getItem('sophia_model') || 'gemini-2.5-flash',
+        selectedModel: localStorage.getItem('sophia_model') || 'gemini-1.5-flash',
         memory: {
             personality: localStorage.getItem('sophia_mem_personality') || '',
             projects: localStorage.getItem('sophia_mem_projects') || '',
@@ -83,10 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const MODELS = [
             config.selectedModel,
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
             "gemini-2.0-flash",
-            "gemini-2.5-flash-lite"
+            "gemini-1.5-flash-8b"
         ];
         const UNIQUE_MODELS = [...new Set(MODELS)];
 
@@ -120,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errStatus = data.error.status;
                     const errMsg = data.error.message;
 
+                    if (errMsg.includes("leaked") || data.error.code === 403) {
+                        return { error: "¡ALERTA DE SEGURIDAD! Tu API Key ha sido filtrada (leaked) y Google la ha bloqueado por seguridad. Debes generar una NUEVA clave en Google AI Studio y borrar la anterior." };
+                    }
                     if (errMsg.includes("expired") || errMsg.includes("invalid")) {
                         return { error: "Tu API Key ha expirado o es inválida. Cámbiala en Configuración." };
                     }
@@ -222,6 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const newKey = apiKeyInput.value.trim();
         const newModel = modelSelect.value;
 
+        if (!newKey) {
+            configStatusDisplay.innerText = "Error: La clave no puede estar vacía.";
+            configStatusDisplay.className = "config-status error";
+            return;
+        }
+
         // Actualizar estado interno INMEDIATAMENTE
         config.apiKey = newKey;
         config.selectedModel = newModel;
@@ -235,12 +244,19 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(`sophia_mem_${key}`, val);
         }
 
-        configStatusDisplay.innerText = "¡Clave y memoria guardadas con éxito!";
+        configStatusDisplay.innerText = "¡Cerebro actualizado! Guardando cambios...";
         configStatusDisplay.className = "config-status success";
 
-        // Re-analizar todo con la nueva clave
-        analyzeMemory();
-        setTimeout(() => switchView('dashboard'), 1000);
+        // Intentar una conexión de prueba silenciosa antes de volver al dashboard
+        callGemini("Hola", true).then(res => {
+            if (res.error && res.error.includes("leaked")) {
+                configStatusDisplay.innerText = "Error: Esta clave está bloqueada por Google. Necesitas una nueva.";
+                configStatusDisplay.className = "config-status error";
+            } else {
+                analyzeMemory();
+                setTimeout(() => switchView('dashboard'), 1500);
+            }
+        });
     });
 
     testConfigBtn.addEventListener('click', async () => {
