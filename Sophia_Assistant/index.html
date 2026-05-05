@@ -130,35 +130,32 @@
                 <!-- Config View -->
                 <div id="config-view" class="view">
                     <div class="config-card">
-                        <h3>Conectar Cerebro de IA</h3>
-                        <p class="config-desc">Configura aquí la conexión con Google Gemini para que Sophia pueda pensar y recordar tus proyectos.</p>
+                        <h3><i class="fas fa-brain"></i> Configuración del Cerebro</h3>
 
                         <div class="form-group">
-                            <label for="api-key">Tu Google API Key:</label>
-                            <input type="password" id="api-key" placeholder="Pega tu clave aquí...">
-                            <small>Consíguela gratis en Google AI Studio.</small>
+                            <label for="api-key">API Key de Google Gemini:</label>
+                            <input type="password" id="api-key" placeholder="Pega tu clave AIza...">
                         </div>
 
                         <div class="form-group">
-                            <label for="model-select">Modelo de Inteligencia (Cerebro):</label>
+                            <label for="model-select">Modelo de Inteligencia:</label>
                             <select id="model-select">
-                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Más rápido, recomendado)</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Más inteligente, pero a veces restringido)</option>
-                                <option value="gemini-pro">Gemini Pro 1.0 (Versión anterior)</option>
+                                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Máxima Inteligencia - 2026)</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Estable)</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Legacy)</option>
                             </select>
-                            <small>Si uno falla, intenta con otro de la lista.</small>
                         </div>
 
                         <div class="form-group">
-                            <label for="system-instruction">Memoria Maestra de Sophia (Datos y Proyectos):</label>
-                            <textarea id="system-instruction" rows="10" placeholder="Pega aquí todo lo que quieres que Sophia recuerde..."></textarea>
+                            <label for="system-instruction">Instrucciones de Personalidad (Prompt):</label>
+                            <textarea id="system-instruction" rows="10" placeholder="Escribe aquí cómo quieres que Sophia trabaje..."></textarea>
                         </div>
 
-                        <div class="config-actions">
-                            <button id="test-connection" class="test-btn"><i class="fas fa-plug"></i> Probar Conexión</button>
-                            <button id="save-config" class="save-btn">Guardar Memoria y Activar Cerebro</button>
+                        <div class="config-buttons">
+                            <button id="test-connection" class="btn-secondary">Probar Conexión</button>
+                            <button id="save-config" class="btn-primary">Guardar y Activar</button>
                         </div>
-                        <div id="config-status" class="config-status"></div>
+                        <p id="config-status" class="config-status"></p>
                     </div>
                 </div>
             </div>

@@ -60,7 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
         // El modelo seleccionado por Gaby va primero. Si falla, probamos los demás como respaldo.
-        const MODELS = [config.selectedModel, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        // Incluimos los nuevos modelos preview/2026 en la lista de respaldo
+        const MODELS = [
+            config.selectedModel,
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
+            "gemini-2.5-pro",
+            "gemini-3.1-pro-preview",
+            "gemini-pro"
+        ];
         const UNIQUE_MODELS = [...new Set(MODELS)]; // Eliminar duplicados
 
         let lastError = "";
