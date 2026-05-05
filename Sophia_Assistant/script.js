@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada v7 (Final Pro Stability)");
+    console.log("Sophia Iniciada v8 (Resolved Conflict)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
         // El modelo seleccionado por Gaby va primero. Si falla, probamos los demás como respaldo.
-        // Incluimos los nuevos modelos preview/2026 en la lista de respaldo
         const MODELS = [
             config.selectedModel,
             "gemini-1.5-flash",
@@ -117,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lastError = "Tiempo agotado para el modelo " + model;
                     continue;
                 }
-                return { error: "Error de conexión. Revisa tu internet." };
+                return { error: "Error de conexión o API Key inválida." };
             }
         }
 
@@ -221,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Interaction ---
     const synth = window.speechSynthesis;
-    const SpeechRecognition = window.Recognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
     if (SpeechRecognition) {
