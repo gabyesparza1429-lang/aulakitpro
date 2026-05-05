@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let config = {
         apiKey: localStorage.getItem('sophia_api_key') || '',
-        selectedModel: localStorage.getItem('sophia_model') || 'gemini-1.5-flash',
+        selectedModel: localStorage.getItem('sophia_model') || 'gemini-3.1-pro-preview',
         systemInstruction: localStorage.getItem('sophia_system_instruction') || ''
     };
 
