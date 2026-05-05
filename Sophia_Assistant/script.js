@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateDisplay = document.getElementById('date-display');
     const sectionTitle = document.getElementById('section-title');
     const apiKeyInput = document.getElementById('api-key');
+    const modelSelect = document.getElementById('model-select');
     const systemInstructionInput = document.getElementById('system-instruction');
     const saveConfigBtn = document.getElementById('save-config');
     const testConfigBtn = document.getElementById('test-connection');
@@ -19,10 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let config = {
         apiKey: localStorage.getItem('sophia_api_key') || '',
+        selectedModel: localStorage.getItem('sophia_model') || 'gemini-1.5-flash',
         systemInstruction: localStorage.getItem('sophia_system_instruction') || ''
     };
 
     apiKeyInput.value = config.apiKey;
+    modelSelect.value = config.selectedModel;
     systemInstructionInput.value = config.systemInstruction;
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dateDisplay.innerText = new Date().toLocaleDateString('es-ES', dateOptions);
@@ -56,11 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function callGemini(prompt, isSystemCall = false) {
         if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
-        // Lista de modelos a intentar en orden de disponibilidad/prioridad
-        const MODELS = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        // El modelo seleccionado por Gaby va primero. Si falla, probamos los demás como respaldo.
+        const MODELS = [config.selectedModel, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        const UNIQUE_MODELS = [...new Set(MODELS)]; // Eliminar duplicados
+
         let lastError = "";
 
-        for (const model of MODELS) {
+        for (const model of UNIQUE_MODELS) {
             const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
             const payload = {
                 contents: [{
@@ -194,8 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
     saveConfigBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         config.apiKey = apiKeyInput.value.trim();
+        config.selectedModel = modelSelect.value;
         config.systemInstruction = systemInstructionInput.value.trim();
+
         localStorage.setItem('sophia_api_key', config.apiKey);
+        localStorage.setItem('sophia_model', config.selectedModel);
         localStorage.setItem('sophia_system_instruction', config.systemInstruction);
         configStatusDisplay.innerText = "¡Guardado! Activando Sophia...";
         configStatusDisplay.className = "config-status success";

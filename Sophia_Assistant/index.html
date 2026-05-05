@@ -140,6 +140,16 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="model-select">Modelo de Inteligencia (Cerebro):</label>
+                            <select id="model-select">
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Más rápido, recomendado)</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Más inteligente, pero a veces restringido)</option>
+                                <option value="gemini-pro">Gemini Pro 1.0 (Versión anterior)</option>
+                            </select>
+                            <small>Si uno falla, intenta con otro de la lista.</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="system-instruction">Memoria Maestra de Sophia (Datos y Proyectos):</label>
                             <textarea id="system-instruction" rows="10" placeholder="Pega aquí todo lo que quieres que Sophia recuerde..."></textarea>
                         </div>
