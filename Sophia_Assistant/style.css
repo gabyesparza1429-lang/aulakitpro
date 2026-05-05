@@ -299,13 +299,13 @@ input:focus, textarea:focus {
     border-left: 4px solid #27ae60;
 }
 
-.config-actions {
+.config-buttons {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
-.test-btn {
+.btn-secondary {
     background-color: #f0f0f0;
     color: var(--text-dark);
     padding: 1rem 1.5rem;
@@ -317,11 +317,11 @@ input:focus, textarea:focus {
     transition: all 0.2s;
 }
 
-.test-btn:hover {
+.btn-secondary:hover {
     background-color: #e0e0e0;
 }
 
-.save-btn {
+.btn-primary {
     flex: 1;
     background-color: var(--lavanda);
     color: white;
@@ -334,7 +334,7 @@ input:focus, textarea:focus {
     transition: all 0.2s;
 }
 
-.save-btn:hover {
+.btn-primary:hover {
     background-color: var(--lavanda-dark);
     transform: translateY(-2px);
 }
