@@ -1,7 +1,7 @@
 :root {
-    --bg-arena: #FAF9F6; /* Mucho más claro y limpio */
-    --lavanda: #6D5B97;    /* Más fuerte y vibrante para la barra lateral */
-    --lavanda-dark: #4A3C6B;
+    --bg-arena: #FCFBF9; /* Aún más claro, casi blanco pero con calidez */
+    --lavanda: #7B66B3;    /* Más vibrante y saturado */
+    --lavanda-dark: #5A4A8A;
     --lavanda-light: #B5A2D9;
     --text-dark: #2D2D2D;
     --white: #ffffff;
@@ -31,6 +31,7 @@ body {
 .sidebar {
     width: 280px;
     background-color: var(--lavanda);
+    background: linear-gradient(180deg, var(--lavanda) 0%, var(--lavanda-dark) 100%);
     color: var(--white);
     padding: 2rem 1rem;
     display: flex;
@@ -281,9 +282,97 @@ input:focus, textarea:focus {
 .config-status.error {
     color: #d63031;
     background: #fff5f5;
-    padding: 0.5rem;
-    border-radius: 5px;
+    padding: 1rem;
+    border-radius: 10px;
     margin-top: 1rem;
+    font-size: 0.9rem;
+    border-left: 4px solid #d63031;
+}
+
+.config-status.success {
+    color: #27ae60;
+    background: #f0fff4;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    border-left: 4px solid #27ae60;
+}
+
+.config-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.test-btn {
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.test-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.save-btn {
+    flex: 1;
+    background-color: var(--lavanda);
+    color: white;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.save-btn:hover {
+    background-color: var(--lavanda-dark);
+    transform: translateY(-2px);
+}
+
+/* Config View Styles */
+.config-card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    max-width: 900px;
+}
+
+.config-desc {
+    margin-bottom: 2rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+}
+
+.info-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 /* Custom Table/List Styles */

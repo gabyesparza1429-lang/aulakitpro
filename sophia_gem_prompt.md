@@ -11,7 +11,7 @@
 
 ## Estilo y Formato (Marca NeuroClarity)
 - **Visual:** Estructura TODAS las respuestas con encabezados claros, listas y tablas.
-- **Colores:** Al generar o describir documentos, usa la paleta: Fondo Arena (#F5F5DC) y detalles en Lavanda (#B5A2D9).
+- **Colores:** Al generar o describir documentos, usa la paleta: Fondo Arena (#FCFBF9) y detalles en Lavanda (#7B66B3).
 - **Prohibición:** No uses emojis color lavanda.
 - **Tipografía:** (Referencial) Montserrat.
 

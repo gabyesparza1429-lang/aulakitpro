@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiKeyInput = document.getElementById('api-key');
     const systemInstructionInput = document.getElementById('system-instruction');
     const saveConfigBtn = document.getElementById('save-config');
+    const testConfigBtn = document.getElementById('test-connection');
     const configStatusDisplay = document.getElementById('config-status');
     const dynamicProjectsMenu = document.getElementById('dynamic-projects');
 
@@ -55,36 +56,59 @@ document.addEventListener('DOMContentLoaded', () => {
     async function callGemini(prompt, isSystemCall = false) {
         if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
-        // Usando gemini-1.5-pro (versión más estable y potente)
-        const MODEL = "gemini-1.5-pro";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${config.apiKey}`;
+        // Lista de modelos a intentar en orden de disponibilidad/prioridad
+        const MODELS = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        let lastError = "";
 
-        const payload = {
-            contents: [{ parts: [{ text: isSystemCall ? prompt : `Instrucción de Sistema: ${config.systemInstruction}\n\nUsuario dice: ${prompt}` }] }]
-        };
+        for (const model of MODELS) {
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
+            const payload = {
+                contents: [{
+                    parts: [{ text: isSystemCall ? prompt : `Instrucción de Sistema: ${config.systemInstruction}\n\nUsuario dice: ${prompt}` }]
+                }]
+            };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 segundos máximo
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos por intento
 
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
 
-            const data = await response.json();
-            if (data.error) return { error: data.error.message };
-            if (!data.candidates || !data.candidates[0]) return { error: "Google no devolvió respuesta. Revisa tu saldo o límites." };
+                const data = await response.json();
 
-            return { text: data.candidates[0].content.parts[0].text };
-        } catch (e) {
-            clearTimeout(timeoutId);
-            if (e.name === 'AbortError') return { error: "Sophia tardó demasiado en responder. Revisa tu conexión." };
-            return { error: "Error de conexión o API Key inválida." };
+                // Si el error es 404 (Modelo no encontrado), intentamos el siguiente
+                if (data.error) {
+                    lastError = data.error.message;
+                    console.warn(`Modelo ${model} falló: ${lastError}`);
+                    if (data.error.status === "NOT_FOUND" || data.error.code === 404) continue;
+                    return { error: lastError }; // Otros errores (como API Key) son definitivos
+                }
+
+                if (!data.candidates || !data.candidates[0]) {
+                    lastError = "Google no devolvió respuesta. Revisa tu saldo o límites.";
+                    continue;
+                }
+
+                console.log(`Sophia conectada exitosamente usando ${model}`);
+                return { text: data.candidates[0].content.parts[0].text };
+
+            } catch (e) {
+                clearTimeout(timeoutId);
+                if (e.name === 'AbortError') {
+                    lastError = "Tiempo agotado para el modelo " + model;
+                    continue;
+                }
+                return { error: "Error de conexión. Revisa tu internet." };
+            }
         }
+
+        return { error: lastError || "No se pudo conectar con ningún modelo de Gemini." };
     }
 
     // --- Auto Analysis of Memory ---
@@ -149,6 +173,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (config.apiKey && config.systemInstruction) analyzeMemory();
 
     // --- Configuration Logic ---
+    testConfigBtn.addEventListener('click', async () => {
+        const originalApiKey = config.apiKey;
+        config.apiKey = apiKeyInput.value.trim();
+        configStatusDisplay.innerText = "Probando conexión...";
+        configStatusDisplay.className = "config-status";
+
+        const result = await callGemini("Hola, responde solo con la palabra 'OK' si recibes esto.", true);
+
+        if (result.error) {
+            configStatusDisplay.innerText = "Error: " + result.error;
+            configStatusDisplay.className = "config-status error";
+            config.apiKey = originalApiKey; // Revertir si falla
+        } else {
+            configStatusDisplay.innerText = "¡Conexión exitosa! Sophia está lista.";
+            configStatusDisplay.className = "config-status success";
+        }
+    });
+
     saveConfigBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         config.apiKey = apiKeyInput.value.trim();
