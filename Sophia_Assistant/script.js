@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada");
+    console.log("Sophia Iniciada v5 (Error Diagnostic)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -29,48 +29,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Navigation Logic ---
     function switchView(target) {
-        console.log("Cambiando a vista:", target);
-
-        // Hide all views
         document.querySelectorAll('.view').forEach(v => {
             v.classList.remove('active');
             v.style.display = 'none';
         });
-
-        // Remove active class from all nav items
         document.querySelectorAll('nav li').forEach(li => li.classList.remove('active'));
-
         const viewId = `${target}-view`;
         const targetView = document.getElementById(viewId);
         const navItem = document.querySelector(`nav li[data-target="${target}"]`);
-
         if (targetView) {
             targetView.classList.add('active');
             targetView.style.display = 'block';
             if (navItem) navItem.classList.add('active');
             sectionTitle.innerText = navItem ? navItem.innerText.trim() : "Dashboard";
-        } else {
-            // Fallback to dashboard
-            const dash = document.getElementById('dashboard-view');
-            dash.classList.add('active');
-            dash.style.display = 'block';
-            document.querySelector('nav li[data-target="dashboard"]').classList.add('active');
-            sectionTitle.innerText = "Dashboard";
         }
     }
 
-    // Attach click events to nav items
     document.querySelectorAll('nav li').forEach(li => {
         li.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = li.getAttribute('data-target');
-            if (target) switchView(target);
+            switchView(li.getAttribute('data-target'));
         });
     });
 
     // --- Gemini API Logic ---
     async function callGemini(prompt, isSystemCall = false) {
-        if (!config.apiKey) return null;
+        if (!config.apiKey) return { error: "No hay API Key configurada" };
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.apiKey}`;
 
         const payload = {
@@ -84,95 +68,110 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            return data.candidates[0].content.parts[0].text;
+
+            if (data.error) {
+                return { error: data.error.message || "Error desconocido de Google" };
+            }
+            if (!data.candidates || !data.candidates[0]) {
+                return { error: "Google no devolvió una respuesta válida. Revisa tu saldo o límites." };
+            }
+
+            return { text: data.candidates[0].content.parts[0].text };
         } catch (e) {
-            console.error("Error API Gemini:", e);
-            return null;
+            return { error: "No hay conexión a internet o el servidor de Google está caído." };
         }
     }
 
     // --- Auto Analysis of Memory ---
     async function analyzeMemory() {
-        if (!config.apiKey || !config.systemInstruction) {
-            console.log("Falta configuración para analizar memoria");
-            return;
-        }
-
-        console.log("Sophia analizando memoria...");
+        if (!config.apiKey || !config.systemInstruction) return;
 
         const cards = document.querySelectorAll('.card-value');
         cards.forEach(c => c.innerText = "Analizando...");
 
         const extractionPrompt = `
         Analiza esta información: "${config.systemInstruction}"
-        Extrae y responde exclusivamente en este formato JSON, sin texto extra:
+        Responde estrictamente en formato JSON, sin texto extra:
         {
-            "proyecto": "Nombre corto del proyecto actual",
-            "salud": "Glucosa y Colesterol actual",
-            "bienestar": "Próximo paso en Lote 71",
-            "detalles_proyectos": "Resumen en HTML (usa <ul> y <li>)",
-            "detalles_salud": "Tabla HTML (usa <table>, <tr>, <td>) con indicadores",
-            "detalles_bienestar": "Resumen HTML de Lote 71"
+            "proyecto": "Nombre corto proyecto",
+            "salud": "Glucosa/Colesterol",
+            "bienestar": "Próximo paso",
+            "detalles_proyectos": "Resumen HTML",
+            "detalles_salud": "Tabla HTML",
+            "detalles_bienestar": "Resumen HTML"
         }
         `;
 
-        const rawJson = await callGemini(extractionPrompt, true);
-        if (rawJson) {
-            try {
-                const cleanJson = rawJson.replace(/```json|```/g, '').trim();
-                const data = JSON.parse(cleanJson);
+        const result = await callGemini(extractionPrompt, true);
 
-                // Actualizar Dashboard
-                document.querySelector('#card-project .card-value').innerText = data.proyecto || "No detectado";
-                document.querySelector('#card-health .card-value').innerText = data.salud || "No detectado";
-                document.querySelector('#card-wellness .card-value').innerText = data.bienestar || "No detectado";
-
-                // Actualizar Vistas
-                document.getElementById('projects-content').innerHTML = data.detalles_proyectos || "<p>Sin datos</p>";
-                document.getElementById('health-content').innerHTML = data.detalles_salud || "<p>Sin datos</p>";
-                document.getElementById('wellness-content').innerHTML = data.detalles_bienestar || "<p>Sin datos</p>";
-
-            } catch (e) {
-                console.error("Error parseando memoria:", e);
-                cards.forEach(c => c.innerText = "Error de formato");
-            }
-        } else {
-            cards.forEach(c => c.innerText = "Error de conexión");
-        }
-    }
-
-    // Initial analysis
-    if (config.apiKey && config.systemInstruction) {
-        analyzeMemory();
-    }
-
-    // --- Configuration Logic ---
-    saveConfigBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        config.apiKey = apiKeyInput.value.trim();
-        config.systemInstruction = systemInstructionInput.value.trim();
-
-        if (!config.apiKey) {
-            alert("Por favor ingresa tu API Key");
+        if (result.error) {
+            cards.forEach(c => c.innerText = "Error: " + result.error);
+            console.error(result.error);
             return;
         }
 
-        localStorage.setItem('sophia_api_key', config.apiKey);
-        localStorage.setItem('sophia_system_instruction', config.systemInstruction);
+        try {
+            const cleanJson = result.text.replace(/```json|```/g, '').trim();
+            const data = JSON.parse(cleanJson);
 
-        configStatusDisplay.innerText = "¡Cerebro actualizado y guardado!";
-        configStatusDisplay.className = "config-status success";
+            document.querySelector('#card-project .card-value').innerText = data.proyecto || "No detectado";
+            document.querySelector('#card-health .card-value').innerText = data.salud || "No detectado";
+            document.querySelector('#card-wellness .card-value').innerText = data.bienestar || "No detectado";
 
-        analyzeMemory();
+            document.getElementById('projects-content').innerHTML = data.detalles_proyectos || "<p>Sin datos</p>";
+            document.getElementById('health-content').innerHTML = data.detalles_salud || "<p>Sin datos</p>";
+            document.getElementById('wellness-content').innerHTML = data.detalles_bienestar || "<p>Sin datos</p>";
+        } catch (e) {
+            cards.forEach(c => c.innerText = "Error de formato en la respuesta");
+        }
+    }
 
-        setTimeout(() => {
-            configStatusDisplay.innerText = "";
-            switchView('dashboard');
-        }, 1500);
+    if (config.apiKey && config.systemInstruction) analyzeMemory();
+
+    // --- Configuration Logic ---
+    saveConfigBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const testKey = apiKeyInput.value.trim();
+        configStatusDisplay.innerText = "Verificando conexión...";
+        configStatusDisplay.className = "config-status";
+
+        // Probar conexión antes de guardar
+        const testPrompt = "Hola, responde solo 'ok'";
+        const API_URL_TEST = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${testKey}`;
+
+        try {
+            const resp = await fetch(API_URL_TEST, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: testPrompt }] }] })
+            });
+            const data = await resp.json();
+
+            if (data.error) {
+                configStatusDisplay.innerText = "Error: " + data.error.message;
+                configStatusDisplay.className = "config-status error";
+                return;
+            }
+
+            // Si funciona, guardar todo
+            config.apiKey = testKey;
+            config.systemInstruction = systemInstructionInput.value.trim();
+            localStorage.setItem('sophia_api_key', config.apiKey);
+            localStorage.setItem('sophia_system_instruction', config.systemInstruction);
+
+            configStatusDisplay.innerText = "¡Conexión Exitosa! Sophia activada.";
+            configStatusDisplay.className = "config-status success";
+
+            analyzeMemory();
+            setTimeout(() => switchView('dashboard'), 1500);
+
+        } catch (e) {
+            configStatusDisplay.innerText = "Error de red. Revisa tu internet.";
+            configStatusDisplay.className = "config-status error";
+        }
     });
 
-    // --- Chat & Voice Logic ---
+    // --- Chat Logic ---
     const synth = window.speechSynthesis;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
@@ -192,12 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const thinkingId = Date.now();
         addMessage("Sophia está pensando...", 'system', thinkingId);
 
-        const responseText = await callGemini(text);
+        const result = await callGemini(text);
         const thinkingMsg = document.getElementById(thinkingId);
-        if (thinkingMsg) thinkingMsg.innerHTML = `<p>${responseText || 'Lo siento Gaby, tuve un problema al procesar eso. Revisa tu conexión.'}</p>`;
 
-        if (responseText) {
-            const utter = new SpeechSynthesisUtterance(responseText);
+        if (result.error) {
+            thinkingMsg.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+        } else {
+            thinkingMsg.innerHTML = `<p>${result.text}</p>`;
+            const utter = new SpeechSynthesisUtterance(result.text);
             utter.lang = 'es-ES';
             synth.speak(utter);
         }
@@ -214,14 +215,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sendBtn.addEventListener('click', (e) => { e.preventDefault(); handleMessage(userInput.value); });
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
-    voiceBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (recognition) {
-            try {
-                recognition.start();
-            } catch(e) {
-                console.log("Reconocimiento ya activo");
-            }
-        }
-    });
+    voiceBtn.addEventListener('click', (e) => { e.preventDefault(); if (recognition) recognition.start(); });
 });
