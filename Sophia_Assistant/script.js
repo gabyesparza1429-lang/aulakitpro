@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada v6 (Pro Model & Dynamic Menu)");
+    console.log("Sophia Iniciada v7 (Final Pro Stability)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         systemInstruction: localStorage.getItem('sophia_system_instruction') || ''
     };
 
-    // Load initial values
     apiKeyInput.value = config.apiKey;
     systemInstructionInput.value = config.systemInstruction;
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -34,11 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
             v.style.display = 'none';
         });
         document.querySelectorAll('nav li').forEach(li => li.classList.remove('active'));
-
         const viewId = `${target}-view`;
         const targetView = document.getElementById(viewId);
         const navItem = document.querySelector(`nav li[data-target="${target}"]`);
-
         if (targetView) {
             targetView.classList.add('active');
             targetView.style.display = 'block';
@@ -54,39 +51,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Gemini API Logic (Using Pro Model) ---
+    // --- Gemini API Logic ---
     async function callGemini(prompt, isSystemCall = false) {
-        if (!config.apiKey) return { error: "Falta API Key" };
+        if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
-        // Gaby solicitó gemini-1.5-pro-latest
-        const MODEL = "gemini-1.5-pro-latest";
+        // Usando gemini-1.5-pro (versión más estable y potente)
+        const MODEL = "gemini-1.5-pro";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${config.apiKey}`;
 
         const payload = {
             contents: [{ parts: [{ text: isSystemCall ? prompt : `Instrucción de Sistema: ${config.systemInstruction}\n\nUsuario dice: ${prompt}` }] }]
         };
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 segundos máximo
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
+
             const data = await response.json();
             if (data.error) return { error: data.error.message };
+            if (!data.candidates || !data.candidates[0]) return { error: "Google no devolvió respuesta. Revisa tu saldo o límites." };
+
             return { text: data.candidates[0].content.parts[0].text };
         } catch (e) {
-            return { error: "Error de conexión con Google" };
+            clearTimeout(timeoutId);
+            if (e.name === 'AbortError') return { error: "Sophia tardó demasiado en responder. Revisa tu conexión." };
+            return { error: "Error de conexión o API Key inválida." };
         }
     }
 
-    // --- Auto Analysis of Memory (with Dynamic Projects) ---
+    // --- Auto Analysis of Memory ---
     async function analyzeMemory() {
         if (!config.apiKey || !config.systemInstruction) return;
 
+        const cards = document.querySelectorAll('.card-value');
+        cards.forEach(c => c.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Leyendo...');
+
         const extractionPrompt = `
         Analiza esta información: "${config.systemInstruction}"
-        Responde estrictamente en formato JSON, sin texto extra:
+        Responde estrictamente en formato JSON, sin texto extra ni markdown:
         {
             "proyecto_activo": "Nombre corto",
             "salud_resumen": "Glucosa/Colesterol",
@@ -99,8 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const result = await callGemini(extractionPrompt, true);
+
         if (result.error) {
-            console.error(result.error);
+            cards.forEach(c => c.innerHTML = `<span style="color:#d63031; font-size:0.8rem">${result.error}</span>`);
             return;
         }
 
@@ -108,34 +119,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const cleanJson = result.text.replace(/```json|```/g, '').trim();
             const data = JSON.parse(cleanJson);
 
-            // Update Dashboard
             document.querySelector('#card-project .card-value').innerText = data.proyecto_activo;
             document.querySelector('#card-health .card-value').innerText = data.salud_resumen;
             document.querySelector('#card-wellness .card-value').innerText = data.bienestar_resumen;
 
-            // Update Modules
             document.getElementById('projects-content').innerHTML = data.detalles_proyectos;
             document.getElementById('health-content').innerHTML = data.detalles_salud;
             document.getElementById('wellness-content').innerHTML = data.detalles_bienestar;
 
-            // --- Dynamic Projects Menu ---
             dynamicProjectsMenu.innerHTML = '';
             if (data.lista_proyectos) {
                 data.lista_proyectos.forEach(pName => {
                     const li = document.createElement('li');
                     li.className = 'project-item';
                     li.innerHTML = `<i class="fas fa-chevron-right" style="font-size:0.7rem"></i> ${pName}`;
-                    li.addEventListener('click', (e) => {
+                    li.onclick = (e) => {
                         e.stopPropagation();
                         switchView('projects');
                         sectionTitle.innerText = "Proyecto: " + pName;
-                    });
+                    };
                     dynamicProjectsMenu.appendChild(li);
                 });
             }
-
         } catch (e) {
-            console.error("Error parseando memoria", e);
+            cards.forEach(c => c.innerText = "Error de formato");
         }
     }
 
@@ -146,20 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         config.apiKey = apiKeyInput.value.trim();
         config.systemInstruction = systemInstructionInput.value.trim();
-
         localStorage.setItem('sophia_api_key', config.apiKey);
         localStorage.setItem('sophia_system_instruction', config.systemInstruction);
-
-        configStatusDisplay.innerText = "¡Sophia activada! Conectando...";
+        configStatusDisplay.innerText = "¡Guardado! Activando Sophia...";
         configStatusDisplay.className = "config-status success";
-
         await analyzeMemory();
-        setTimeout(() => switchView('dashboard'), 1500);
+        setTimeout(() => switchView('dashboard'), 1000);
     });
 
     // --- Interaction ---
     const synth = window.speechSynthesis;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.Recognition || window.webkitSpeechRecognition;
     let recognition;
 
     if (SpeechRecognition) {
@@ -174,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!text.trim()) return;
         addMessage(text, 'user');
         const thinkingId = Date.now();
-        addMessage("Sophia pensando...", 'system', thinkingId);
+        addMessage("Sophia está pensando...", 'system', thinkingId);
 
         const result = await callGemini(text);
         const msg = document.getElementById(thinkingId);
