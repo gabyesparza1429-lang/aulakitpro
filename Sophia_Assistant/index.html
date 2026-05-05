@@ -85,6 +85,9 @@
                             <span class="command-tip">Usa "ya" para continuar</span>
                         </div>
                     </div>
+
+                    <!-- Dynamic Magic Container for Sophia to inject content -->
+                    <div id="magic-container" class="magic-container"></div>
                 </div>
 
                 <!-- Projects View -->
@@ -140,15 +143,37 @@
                         <div class="form-group">
                             <label for="model-select">Modelo de Inteligencia:</label>
                             <select id="model-select">
-                                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Máxima Inteligencia - 2026)</option>
-                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Estable)</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Legacy)</option>
+                                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (Recomendado)</option>
+                                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Súper Rápido)</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Estable)</option>
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="system-instruction">Instrucciones de Personalidad (Prompt):</label>
-                            <textarea id="system-instruction" rows="10" placeholder="Escribe aquí cómo quieres que Sophia trabaje..."></textarea>
+                        <div class="config-grid">
+                            <div class="form-group">
+                                <label for="config-personality"><i class="fas fa-user-tie"></i> Mi Personalidad:</label>
+                                <textarea id="config-personality" rows="4" placeholder="Ej: Eres Sophia, directa y eficiente..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-projects"><i class="fas fa-briefcase"></i> Memoria: Proyectos:</label>
+                                <textarea id="config-projects" rows="4" placeholder="Lista tus proyectos de NeuroClarity..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-health"><i class="fas fa-heartbeat"></i> Memoria: Salud:</label>
+                                <textarea id="config-health" rows="4" placeholder="Glucosa, colesterol, citas médicas..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-wellness"><i class="fas fa-leaf"></i> Memoria: Bienestar:</label>
+                                <textarea id="config-wellness" rows="4" placeholder="Lote 71, cabañas, alimentación..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-email"><i class="fas fa-envelope"></i> Memoria: Filtro Email:</label>
+                                <textarea id="config-email" rows="4" placeholder="Temu, newsletters, facturas..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-custom"><i class="fas fa-magic"></i> Memoria: Secciones Libres:</label>
+                                <textarea id="config-custom" rows="4" placeholder="Recetas, ideas sueltas, lo que tú quieras..."></textarea>
+                            </div>
                         </div>
 
                         <div class="config-buttons">
