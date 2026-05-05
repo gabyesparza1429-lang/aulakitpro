@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada v7 (Final Pro Stability)");
+    console.log("Sophia Iniciada v7 (Final Pro Stability - 2026 Optimized)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let config = {
         apiKey: localStorage.getItem('sophia_api_key') || '',
-        selectedModel: localStorage.getItem('sophia_model') || 'gemini-3.1-pro-preview',
+        // Actualizado al modelo más potente de tu lista
+        selectedModel: localStorage.getItem('sophia_model') || 'gemini-3.1-pro-preview', 
         systemInstruction: localStorage.getItem('sophia_system_instruction') || ''
     };
 
@@ -59,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function callGemini(prompt, isSystemCall = false) {
         if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
 
-        // El modelo seleccionado por Gaby va primero. Si falla, probamos los demás como respaldo.
-        const MODELS = [config.selectedModel, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
-        const UNIQUE_MODELS = [...new Set(MODELS)]; // Eliminar duplicados
+        // Lista de modelos actualizada según tu lista oficial de 2026
+        const MODELS = [config.selectedModel, "gemini-3.1-pro-preview", "gemini-2.5-pro", "gemini-1.5-pro"];
+        const UNIQUE_MODELS = [...new Set(MODELS)]; 
 
         let lastError = "";
 
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos por intento
+            const timeoutId = setTimeout(() => controller.abort(), 15000); 
 
             try {
                 const response = await fetch(API_URL, {
@@ -87,33 +88,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                // Si el error es 404 (Modelo no encontrado), intentamos el siguiente
                 if (data.error) {
                     lastError = data.error.message;
                     console.warn(`Modelo ${model} falló: ${lastError}`);
                     if (data.error.status === "NOT_FOUND" || data.error.code === 404) continue;
-                    return { error: lastError }; // Otros errores (como API Key) son definitivos
+                    return { error: lastError }; 
                 }
 
                 if (!data.candidates || !data.candidates[0]) {
-                    lastError = "Google no devolvió respuesta. Revisa tu saldo o límites.";
+                    lastError = "Respuesta vacía. Revisa límites.";
                     continue;
                 }
 
-                console.log(`Sophia conectada exitosamente usando ${model}`);
+                console.log(`Sophia conectada con ${model}`);
                 return { text: data.candidates[0].content.parts[0].text };
 
             } catch (e) {
                 clearTimeout(timeoutId);
                 if (e.name === 'AbortError') {
-                    lastError = "Tiempo agotado para el modelo " + model;
+                    lastError = "Tiempo agotado en " + model;
                     continue;
                 }
-                return { error: "Error de conexión. Revisa tu internet." };
+                return { error: "Error de conexión." };
             }
         }
 
-        return { error: lastError || "No se pudo conectar con ningún modelo de Gemini." };
+        return { error: lastError || "No se pudo conectar." };
     }
 
     // --- Auto Analysis of Memory ---
@@ -121,11 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!config.apiKey || !config.systemInstruction) return;
 
         const cards = document.querySelectorAll('.card-value');
-        cards.forEach(c => c.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Leyendo...');
+        cards.forEach(c => c.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...');
 
         const extractionPrompt = `
         Analiza esta información: "${config.systemInstruction}"
-        Responde estrictamente en formato JSON, sin texto extra ni markdown:
+        Responde estrictamente en formato JSON:
         {
             "proyecto_activo": "Nombre corto",
             "salud_resumen": "Glucosa/Colesterol",
@@ -134,18 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
             "detalles_proyectos": "HTML lista",
             "detalles_salud": "HTML tabla",
             "detalles_bienestar": "HTML resumen"
-        }
-        `;
+        }`;
 
         const result = await callGemini(extractionPrompt, true);
 
         if (result.error) {
-            cards.forEach(c => c.innerHTML = `<span style="color:#d63031; font-size:0.8rem">${result.error}</span>`);
+            cards.forEach(c => c.innerHTML = `<span style="color:#d63031; font-size:0.7rem">Revisar Config</span>`);
             return;
         }
 
         try {
-            const cleanJson = result.text.replace(/```json|```/g, '').trim();
+            const cleanJson = result.text.replace(/```json|
+```/g, '').trim();
             const data = JSON.parse(cleanJson);
 
             document.querySelector('#card-project .card-value').innerText = data.proyecto_activo;
@@ -161,17 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.lista_proyectos.forEach(pName => {
                     const li = document.createElement('li');
                     li.className = 'project-item';
-                    li.innerHTML = `<i class="fas fa-chevron-right" style="font-size:0.7rem"></i> ${pName}`;
-                    li.onclick = (e) => {
-                        e.stopPropagation();
-                        switchView('projects');
-                        sectionTitle.innerText = "Proyecto: " + pName;
-                    };
+                    li.innerHTML = `<i class="fas fa-chevron-right"></i> ${pName}`;
+                    li.onclick = () => { switchView('projects'); sectionTitle.innerText = pName; };
                     dynamicProjectsMenu.appendChild(li);
                 });
             }
         } catch (e) {
-            cards.forEach(c => c.innerText = "Error de formato");
+            cards.forEach(c => c.innerText = "Error formato");
         }
     }
 
@@ -181,17 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
     testConfigBtn.addEventListener('click', async () => {
         const originalApiKey = config.apiKey;
         config.apiKey = apiKeyInput.value.trim();
-        configStatusDisplay.innerText = "Probando conexión...";
-        configStatusDisplay.className = "config-status";
-
-        const result = await callGemini("Hola, responde solo con la palabra 'OK' si recibes esto.", true);
+        configStatusDisplay.innerText = "Probando...";
+        const result = await callGemini("Responde OK", true);
 
         if (result.error) {
             configStatusDisplay.innerText = "Error: " + result.error;
             configStatusDisplay.className = "config-status error";
-            config.apiKey = originalApiKey; // Revertir si falla
+            config.apiKey = originalApiKey;
         } else {
-            configStatusDisplay.innerText = "¡Conexión exitosa! Sophia está lista.";
+            configStatusDisplay.innerText = "¡Sophia lista!";
             configStatusDisplay.className = "config-status success";
         }
     });
@@ -205,30 +199,29 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('sophia_api_key', config.apiKey);
         localStorage.setItem('sophia_model', config.selectedModel);
         localStorage.setItem('sophia_system_instruction', config.systemInstruction);
-        configStatusDisplay.innerText = "¡Guardado! Activando Sophia...";
-        configStatusDisplay.className = "config-status success";
+        
         await analyzeMemory();
         setTimeout(() => switchView('dashboard'), 1000);
     });
 
     // --- Interaction ---
     const synth = window.speechSynthesis;
-    const SpeechRecognition = window.Recognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.lang = 'es-ES';
-        recognition.onstart = () => { voiceStatus.innerText = "Escuchando..."; voiceBtn.classList.add('recording'); };
+        recognition.onstart = () => { voiceBtn.classList.add('recording'); };
         recognition.onresult = (e) => { handleMessage(e.results[0][0].transcript); };
-        recognition.onend = () => { voiceStatus.innerText = "Micrófono inactivo"; voiceBtn.classList.remove('recording'); };
+        recognition.onend = () => { voiceBtn.classList.remove('recording'); };
     }
 
     async function handleMessage(text) {
         if (!text.trim()) return;
         addMessage(text, 'user');
         const thinkingId = Date.now();
-        addMessage("Sophia está pensando...", 'system', thinkingId);
+        addMessage("Sophia pensando...", 'system', thinkingId);
 
         const result = await callGemini(text);
         const msg = document.getElementById(thinkingId);
@@ -250,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatDisplay.scrollTop = chatDisplay.scrollHeight;
     }
 
-    sendBtn.addEventListener('click', () => handleMessage(userInput.value));
-    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
+    sendBtn.addEventListener('click', () => { handleMessage(userInput.value); userInput.value = ''; });
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handleMessage(userInput.value); userInput.value = ''; }});
     voiceBtn.addEventListener('click', () => { if (recognition) recognition.start(); });
 });
