@@ -53,3 +53,13 @@ def generador_contenido(request):
     return render(request, 'usuarios/generador_contenido.html', {
         'generated_content': generated_content
     })
+
+# ---------------------------------------------------------
+# 5. VISTA JUEGO DE ELECTRICIDAD
+# ---------------------------------------------------------
+@login_required(login_url='/login/')
+def jeu_electricite(request):
+    """
+    Vista para el juego interactivo de circuitos eléctricos.
+    """
+    return render(request, 'usuarios/jeu_electricite.html')
