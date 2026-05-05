@@ -85,9 +85,8 @@
         
         <h3 class="text-sm text-gray-400 mb-4">Menú Principal</h3>
 
-        <a href="{% url 'usuarios:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
-        <a href="{% url 'usuarios:generador_contenido' %}" class="{% if request.resolver_match.url_name == 'generador_contenido' %}active{% endif %}">📝 Generador de Contenido IA</a>
-        <a href="{% url 'usuarios:jeu_electricite' %}" class="{% if request.resolver_match.url_name == 'jeu_electricite' %}active{% endif %}">⚡ Jeu d'Électricité</a>
+        <a href="{% url 'usuarios:dashboard' %}" class="active">🏠 Dashboard</a>
+        <a href="{% url 'usuarios:generador_contenido' %}">📝 Generador de Contenido IA</a>
         <a href="#">📚 Mis Cursos</a>
         <a href="#">⚙️ Configuración</a>
 

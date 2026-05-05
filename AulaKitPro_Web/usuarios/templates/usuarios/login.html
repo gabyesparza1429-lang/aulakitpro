@@ -5,6 +5,11 @@
 {% block content %}
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Inicia Sesión en AulaKitPro</h2>
 
+    {% comment %}
+        El formulario de autenticación de Django maneja automáticamente los campos de
+        username y password. Usamos el loop para mantener el estilo de tu registro.
+    {% endcomment %}
+
     {% if form.errors %}
         <p class="text-red-600 mb-4">Tu nombre de usuario o contraseña son incorrectos. Intenta de nuevo.</p>
     {% endif %}
@@ -16,7 +21,8 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
 
-            {{ field }}
+            <!-- Aplicando clases de Tailwind directamente al campo del formulario -->
+            {{ field.as_widget.attrs.class|add:"w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" }}
 
             {% for error in field.errors %}
                 <p class="text-sm text-red-600 mt-1">{{ error }}</p>
@@ -43,23 +49,5 @@
             Regístrate aquí
         </a>
     </p>
-
-    <style>
-        /* Estilo para que los inputs se vean bien sin widget-tweaks */
-        input {
-            width: 100%;
-            padding: 0.5rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-        }
-        input:focus {
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) #3b82f6;
-            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-            border-color: #3b82f6;
-        }
-    </style>
 
 {% endblock %}
