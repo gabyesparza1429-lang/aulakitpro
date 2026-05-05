@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sophia Iniciada v10 (Quota Management & Real-time Sync)");
+    console.log("Sophia Iniciada v11 (API Key Fix & Persistent Sync)");
 
     // --- Elements ---
     const chatDisplay = document.getElementById('chat-display');
@@ -74,10 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Gemini API Logic ---
-    async function callGemini(prompt, isSystemCall = false) {
-        if (!config.apiKey) return { error: "Falta API Key. Ve a Configuración." };
+    async function callGemini(prompt, isSystemCall = false, tempKey = null) {
+        // Usa la clave temporal (para pruebas) o la guardada
+        const currentKey = tempKey || config.apiKey;
 
-        // Priority List for Fallback (Avoid Quota Errors)
+        if (!currentKey) return { error: "Falta API Key. Ve a Configuración." };
+
         const MODELS = [
             config.selectedModel,
             "gemini-1.5-flash",
@@ -96,8 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         for (const model of UNIQUE_MODELS) {
-            console.log(`Intentando con modelo: ${model}`);
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${currentKey}`;
             const payload = {
                 contents: [{
                     parts: [{ text: isSystemCall ? prompt : `CONTEXTO SOPHIA:\n${globalContext}\n\nMENSAJE GABY: ${prompt}` }]
@@ -117,11 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errStatus = data.error.status;
                     const errMsg = data.error.message;
 
-                    // 429 = Quota Exceeded, 404 = Not Found
-                    if (errStatus === "RESOURCE_EXHAUSTED" || data.error.code === 429) {
-                        console.warn(`Cuota agotada en ${model}. Probando siguiente...`);
-                        continue;
+                    if (errMsg.includes("expired") || errMsg.includes("invalid")) {
+                        return { error: "Tu API Key ha expirado o es inválida. Cámbiala en Configuración." };
                     }
+                    if (errStatus === "RESOURCE_EXHAUSTED" || data.error.code === 429) continue;
                     if (data.error.code === 404) continue;
 
                     return { error: `Error de Google: ${errMsg}` };
@@ -130,12 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.candidates && data.candidates[0]) {
                     return { text: data.candidates[0].content.parts[0].text, usedModel: model };
                 }
-            } catch (e) {
-                console.error("Fallo de red para " + model, e);
-                continue;
-            }
+            } catch (e) { continue; }
         }
-        return { error: "Todos los modelos fallaron. Revisa tu cuota o clave en Google AI Studio." };
+        return { error: "Sophia no pudo conectar. Revisa tu clave o internet." };
     }
 
     function handleMagicContent(aiText) {
@@ -157,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.card-value');
         cards.forEach(c => c.innerHTML = '<i class="fas fa-spinner fa-spin"></i>');
 
-        const extractionPrompt = `Analiza mi memoria y responde SOLO en JSON: {"proyecto_activo":"...","salud_resumen":"...","bienestar_resumen":"...","lista_proyectos":["..."]} Memoria: ${JSON.stringify(config.memory)}`;
+        const extractionPrompt = `Resumen rápido JSON: {"proyecto_activo":"...","salud_resumen":"...","bienestar_resumen":"...","lista_proyectos":[]} Memoria: ${JSON.stringify(config.memory)}`;
         const result = await callGemini(extractionPrompt, true);
 
         if (result.text) {
@@ -175,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.innerHTML = `<i class="fas fa-chevron-right"></i> ${p}`;
                     dynamicProjectsMenu.appendChild(li);
                 });
-            } catch (e) { console.error("Error JSON"); }
+            } catch (e) { console.error("Error JSON Memory Sync"); }
         }
     }
 
@@ -211,28 +208,53 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', () => handleMessage(userInput.value));
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMessage(userInput.value); });
 
+    // --- REPARACIÓN DE GUARDADO (Fix v11) ---
     saveConfigBtn.addEventListener('click', () => {
-        config.apiKey = apiKeyInput.value.trim();
-        config.selectedModel = modelSelect.value;
-        localStorage.setItem('sophia_api_key', config.apiKey);
-        localStorage.setItem('sophia_model', config.selectedModel);
+        const newKey = apiKeyInput.value.trim();
+        const newModel = modelSelect.value;
+
+        // Actualizar estado interno INMEDIATAMENTE
+        config.apiKey = newKey;
+        config.selectedModel = newModel;
+
+        localStorage.setItem('sophia_api_key', newKey);
+        localStorage.setItem('sophia_model', newModel);
 
         for (let key in configFields) {
             const val = configFields[key].value.trim();
             config.memory[key] = val;
             localStorage.setItem(`sophia_mem_${key}`, val);
         }
-        configStatusDisplay.innerText = "¡Sophia actualizada en tiempo real!";
+
+        configStatusDisplay.innerText = "¡Clave y memoria guardadas con éxito!";
         configStatusDisplay.className = "config-status success";
+
+        // Re-analizar todo con la nueva clave
         analyzeMemory();
         setTimeout(() => switchView('dashboard'), 1000);
     });
 
     testConfigBtn.addEventListener('click', async () => {
-        configStatusDisplay.innerText = "Probando clave...";
-        const res = await callGemini("Responde OK", true);
-        configStatusDisplay.innerText = res.error ? "Error: " + res.error : "¡Conexión Exitosa!";
-        configStatusDisplay.className = res.error ? "config-status error" : "config-status success";
+        const tempKey = apiKeyInput.value.trim(); // Lee lo que hay en el cuadro AHORA
+        if (!tempKey) {
+            configStatusDisplay.innerText = "Escribe una clave primero.";
+            configStatusDisplay.className = "config-status error";
+            return;
+        }
+
+        configStatusDisplay.innerText = "Probando tu nueva clave...";
+        configStatusDisplay.className = "config-status";
+
+        // Forzamos el uso de la clave que acaba de escribir
+        const res = await callGemini("Responde OK", true, tempKey);
+
+        if (res.error) {
+            configStatusDisplay.innerText = "Error: " + res.error;
+            configStatusDisplay.className = "config-status error";
+        } else {
+            configStatusDisplay.innerText = "¡Clave Nueva Validada Correctamente!";
+            configStatusDisplay.className = "config-status success";
+        }
     });
 
     if (config.apiKey) analyzeMemory();
