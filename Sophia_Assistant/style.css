@@ -233,6 +233,40 @@ header {
     border-bottom-right-radius: 2px;
 }
 
+/* Markdown Styling in Chat */
+.md-content {
+    width: 100%;
+}
+
+.md-content p {
+    margin-bottom: 0.8rem;
+}
+
+.md-content p:last-child {
+    margin-bottom: 0;
+}
+
+.md-content ul, .md-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.md-content li {
+    margin-bottom: 0.4rem;
+    background: transparent !important; /* Overwrite general li style */
+    padding: 0 !important;
+}
+
+.md-content h1, .md-content h2, .md-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.md-content strong {
+    font-weight: 600;
+}
+
 .input-controls {
     padding: 1.5rem 2rem;
     border-top: 1px solid #f0f0f0;
