@@ -190,11 +190,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const msg = document.getElementById(thinkingId);
 
         if (result.error) {
-            if (msg) msg.innerHTML = `<p style="color:#d63031"><i class="fas fa-exclamation-triangle"></i> ${result.error}</p>`;
+            if (msg) msg.innerHTML = `<div class="md-content" style="color:#d63031"><i class="fas fa-exclamation-triangle"></i> ${result.error}</div>`;
         } else {
             const cleanedText = handleMagicContent(result.text);
-            const modelBadge = `<span style="font-size:0.6rem; opacity:0.5; display:block; margin-top:5px">Vía ${result.usedModel}</span>`;
-            if (msg) msg.innerHTML = `<p>${cleanedText || "Sección actualizada."}${modelBadge}</p>`;
+            const modelBadge = `<span style="font-size:0.6rem; opacity:0.5; display:block; margin-top:5px; border-top:1px solid rgba(0,0,0,0.05); padding-top:5px">Vía ${result.usedModel}</span>`;
+
+            // Render Markdown
+            const htmlContent = marked.parse(cleanedText || "Sección actualizada.");
+            if (msg) msg.innerHTML = `<div class="md-content">${htmlContent}</div>${modelBadge}`;
         }
     }
 
@@ -202,7 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = document.createElement('div');
         d.className = `message ${sender}`;
         if (id) d.id = id;
-        d.innerHTML = `<p>${text}</p>`;
+
+        // Renderizar Markdown también para el usuario (por si usa negritas o listas)
+        const htmlContent = marked.parse(text);
+        d.innerHTML = `<div class="md-content">${htmlContent}</div>`;
+
         chatDisplay.appendChild(d);
         chatDisplay.scrollTop = chatDisplay.scrollHeight;
     }
