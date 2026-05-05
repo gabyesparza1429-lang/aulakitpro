@@ -19,9 +19,13 @@
                 <p>NeuroClarity</p>
             </div>
             <nav>
-                <ul>
+                <ul id="main-nav">
                     <li class="active" data-target="dashboard"><i class="fas fa-th-large"></i> Dashboard</li>
-                    <li data-target="projects"><i class="fas fa-briefcase"></i> Proyectos</li>
+                    <li data-target="projects"><i class="fas fa-briefcase"></i> Proyectos
+                        <ul id="dynamic-projects" class="projects-menu">
+                            <!-- Aquí aparecerán tus proyectos automáticamente -->
+                        </ul>
+                    </li>
                     <li data-target="wellness"><i class="fas fa-leaf"></i> Bienestar</li>
                     <li data-target="health"><i class="fas fa-heartbeat"></i> Salud</li>
                     <li data-target="email"><i class="fas fa-envelope"></i> Filtro Email</li>
